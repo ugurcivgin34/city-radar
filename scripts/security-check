@@ -9,23 +9,29 @@ cd "$ROOT" || exit 1
 failed=0
 
 echo "==> nuget-vulnerabilities"
-if [ -f backend/CityRadar.slnx ]; then
-  # `dotnet package list` is the .NET 10 SDK syntax; it exits 0 even when it finds
-  # vulnerabilities, so the output is inspected. Re-check the syntax when the SDK pin changes.
-  if out=$(dotnet package list --project backend/CityRadar.slnx --vulnerable --include-transitive 2>&1); then
-    echo "$out"
-    if echo "$out" | grep -qi "has the following vulnerable packages"; then
-      echo "SECURITY: vulnerable NuGet packages found" >&2
-      failed=1
-    fi
-  else
-    echo "$out"
-    echo "SECURITY-CHECK INFRA FAILURE: NuGet vulnerability scan could not run" >&2
-    failed=1
-  fi
+# Fail-closed, three outcomes (spec 0001 AC-13): no vulnerabilities -> GREEN; vulnerabilities ->
+# RED; advisory/registry unreachable or unreadable output -> RED labelled as an infra failure.
+# `dotnet package list` exits 0 even when it finds vulnerabilities, so its JSON is parsed by
+# scripts/nuget-audit.cs. Commands run inside backend/ so backend/global.json pins the SDK.
+# `dotnet package list` is the .NET 10 SDK syntax; re-check it when the SDK pin changes.
+nuget_json=$(mktemp)
+nuget_err=$(mktemp)
+if ! (cd backend && dotnet restore CityRadar.slnx >"$nuget_err" 2>&1); then
+  cat "$nuget_err"
+  echo "SECURITY INFRA FAILURE: dotnet restore failed (registry unreachable?)" >&2
+  failed=1
 else
-  echo "SKIP: backend/CityRadar.slnx yok"
+  (cd backend && dotnet package list --project CityRadar.slnx --vulnerable --include-transitive --format json >"$nuget_json" 2>"$nuget_err")
+  list_exit=$?
+  cat "$nuget_err"
+  (cd backend && dotnet run --file ../scripts/nuget-audit.cs -- "$nuget_json" "$list_exit")
+  case $? in
+    0) ;;
+    3) echo "SECURITY: vulnerable NuGet packages found" >&2; failed=1 ;;
+    *) echo "SECURITY INFRA FAILURE: NuGet vulnerability audit could not complete" >&2; failed=1 ;;
+  esac
 fi
+rm -f "$nuget_json" "$nuget_err"
 
 echo "==> npm-audit"
 if [ -f mobile/package.json ]; then
