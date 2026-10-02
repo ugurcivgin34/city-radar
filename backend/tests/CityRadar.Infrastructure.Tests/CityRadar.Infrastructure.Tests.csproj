@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <!-- Deliberately empty test project (spec 0001, plan 0001 amendment 1): zero tests is allowed
+         ONLY here. The feature that adds the first test must remove this line;
+         ZeroTestExceptionTests fails the check while both exist. -->
+    <TestingPlatformCommandLineArguments>$(TestingPlatformCommandLineArguments) --ignore-exit-code 8</TestingPlatformCommandLineArguments>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="xunit.v3" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\CityRadar.Infrastructure\CityRadar.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>

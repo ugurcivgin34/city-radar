@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/CityRadar.Api/CityRadar.Api.csproj" />
+    <Project Path="src/CityRadar.Infrastructure/CityRadar.Infrastructure.csproj" />
+    <Project Path="src/CityRadar.Parking/CityRadar.Parking.csproj" />
+    <Project Path="src/CityRadar.Shared/CityRadar.Shared.csproj" />
+    <Project Path="src/CityRadar.Traffic/CityRadar.Traffic.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/CityRadar.Infrastructure.Tests/CityRadar.Infrastructure.Tests.csproj" />
+    <Project Path="tests/CityRadar.Parking.Tests/CityRadar.Parking.Tests.csproj" />
+    <Project Path="tests/CityRadar.Shared.Tests/CityRadar.Shared.Tests.csproj" />
+    <Project Path="tests/CityRadar.Traffic.Tests/CityRadar.Traffic.Tests.csproj" />
+  </Folder>
+</Solution>
