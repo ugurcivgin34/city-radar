@@ -16,14 +16,14 @@ jobs:
   doctor:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Workspace health (spec/plan gates are failures in CI)
         run: ./scripts/doctor --strict
 
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Setup .NET (SDK pinned by backend/global.json)
         uses: actions/setup-dotnet@v4
         with:
@@ -41,7 +41,7 @@ jobs:
   security-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Setup .NET (SDK pinned by backend/global.json)
         uses: actions/setup-dotnet@v4
         with:
