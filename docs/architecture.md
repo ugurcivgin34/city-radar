@@ -71,17 +71,19 @@ edilebilen hiçbir kural yalnızca dokümana veya hafızaya bırakılmaz.
 
 | # | Kural | Zorlayan |
 |---|---|---|
-| FD-1 | `Parking` ve `Traffic` birbirine referans vermez. | `.csproj` referans yönü + arch test |
-| FD-2 | `Parking`, `Traffic`, `Shared`; `CityRadar.Infrastructure`, `CityRadar.Api`, ASP.NET Core, `Microsoft.Extensions.Caching.*`, `HttpClient`/`System.Net.Http` tabanlı provider erişimine bağımlı olmaz. Yalnızca gerçekten business katmanına ait olmayan teknik bağımlılıklar yasaktır; sırf framework bağımlılığını sıfırlamak için anlamsız abstraction üretilmez (YAGNI). | `.csproj` + arch test |
-| FD-3 | Provider DTO'ları yalnızca `CityRadar.Infrastructure.Providers.*` içinde yaşar, mümkünse `internal`. Api, Mobile ve Parking/Traffic public contract'ları bunları bilmez; dönüşüm adapter sınırında yapılır. | `internal` + arch test |
-| FD-4 | Api public contract'ları (`CityRadar.Api.Contracts.*`) domain tiplerini doğrudan expose etmez. | arch test |
+| FD-1 | `Parking` ve `Traffic` birbirine referans vermez. | `.csproj` referans yönü + `ProjectReferenceTests` (csproj, birebir izinli küme) + `ModuleDependencyTests` (IL) |
+| FD-2 | `Parking`, `Traffic`, `Shared`; `CityRadar.Infrastructure`, `CityRadar.Api`, ASP.NET Core, `Microsoft.Extensions.Caching.*`, `HttpClient`/`System.Net.Http` tabanlı provider erişimine bağımlı olmaz. Yalnızca gerçekten business katmanına ait olmayan teknik bağımlılıklar yasaktır; sırf framework bağımlılığını sıfırlamak için anlamsız abstraction üretilmez (YAGNI). | `ProjectReferenceTests` (Sdk, FrameworkReference, PackageReference) + `ModuleDependencyTests` (IL) |
+| FD-3 | Provider DTO'ları `CityRadar.Infrastructure.Providers.<Provider>.Dtos` altında yaşar ve `internal`'dır. Api, Parking ve Traffic hiçbir `CityRadar.Infrastructure.Providers.*` tipine bağımlı olmaz; dönüşüm adapter sınırında yapılır. Api, Infrastructure'ı yalnızca `Providers.*` dışındaki composition yüzeyi üzerinden kullanır. (`Providers.*` altındaki DTO dışı tiplerin internal olması zorunlu değildir; seçilirse ayrıca kararlaştırılır.) | `ModuleDependencyTests` (IL) |
+| FD-4 | Api contract'ları (`CityRadar.Api.Contracts.*`) Shared/Parking/Traffic tiplerine **hiçbir şekilde** (public yüzey, internal üye, method gövdesi) bağımlı olmaz; domain → contract mapping `Contracts` namespace'i dışında yapılır. *Spec 0001 ile bilinçli olarak sıkılaştırıldı (insan kararı, review F-2, 2026-10-02).* | `ModuleDependencyTests` (IL) |
 | FD-5 | Mobilde HTTP (`fetch`, `axios` veya seçilecek client) yalnızca `mobile/src/api/` içinde kullanılır. | ESLint (`no-restricted-globals` / `no-restricted-imports`) |
 | FD-6 | Mobil kaynakta provider endpoint/host bilgisi (`ibb.gov.tr`, İSPARK host'ları) bulunmaz. Kontrol URL/host'a odaklanır; UI'da "İSPARK" metni serbesttir. | ESLint + `scripts/check` (defense-in-depth) |
 | FD-7 | `react-native-maps`, `@rnmapbox/maps` ve Google/Mapbox native map SDK bağımlılıkları eklenmez (MapLibre serbest). Değişiklik yalnızca ADR ile. | `scripts/check` deny-list |
 | FD-8 | Mobil API contract tipleri yalnızca `mobile/src/api/` sınırından kullanılır. | ESLint (`no-restricted-imports`) |
 
-Architecture test kütüphanesi olarak ArchUnitNET **veya** NetArchTest'ten yalnızca biri
-seçilir (ikisi birden değil); seçim ilk backend setup feature'ında yapılır.
+Architecture test kütüphanesi: **ArchUnitNET** (`TngTech.ArchUnitNET.xUnitV3`) — tek kütüphane;
+gerekçe plan 0001'de (OD-3). Kurallar namespace/assembly tabanlıdır; yeni tipler otomatik kapsanır.
+Saat kuralı (`TimeProvider`) derleyici seviyesindedir: `Microsoft.CodeAnalysis.BannedApiAnalyzers`
++ `backend/BannedSymbols.txt`, yalnızca `backend/src` üretim projelerinde.
 
 ## Harita mimarisi
 
@@ -121,22 +123,16 @@ historical analytics, web client, background location, E2E test altyapısı.
   lisans, attribution zorunlulukları, ücretsiz kullanım limiti, production maliyeti, Android ve
   iOS desteği, Expo uyumluluğu, marker desteği, custom layer desteği, GeoJSON/vector layer
   desteği, traffic overlay çizme yeteneği, vendor lock-in riski.
-- **OD-3 — Architecture test kütüphanesi.** Backend setup feature'ının planında ArchUnitNET ve
-  NetArchTest kısa karşılaştırılır, yalnızca biri seçilir. Kriterler: FD-1–FD-4'ü sade ifade
-  edebilmesi, .NET 10 uyumluluğu, bakım durumu, minimum ek karmaşıklık. Büyük bir ADR gerekmedikçe
-  plandaki gerekçeli karar yeterlidir.
+- ~~OD-3 — Architecture test kütüphanesi.~~ **Kapandı (2026-10-02, plan 0001):** ArchUnitNET —
+  aktif bakım (NetArchTest.Rules'ın son sürümü 2021) ve xUnit v3 entegrasyonu.
 
 ## Setup feature'larına devredilenler
-- **Backend setup:** `Directory.Build.props` içinde NuGetAudit uyarıları (NU1901–NU1904) görünür
-  kalır ama `WarningsNotAsErrors` ile build'i kırmaz — restore/build vulnerability database
-  erişimine bağımlı olmaz; enforcement'ın sahibi `scripts/security-check`. Diğer tüm
-  compiler/analyzer warning'leri için `TreatWarningsAsErrors=true` korunur.
+- ~~Backend setup~~ — **yapıldı (spec 0001):** NU1900–NU1904 `WarningsNotAsErrors`; diğer tüm
+  warning'ler hata; vulnerability enforcement `scripts/security-check`.
 - **Mobil setup:** paket yöneticisi **npm**; `package-lock.json` source control'a girer, CI ve
   `scripts/check` `npm ci` kullanır.
-- **Dependabot:** backend ve mobil dependency manifestleri oluştuğunda ilgili setup feature'ında eklenir.
-- **README:** ANEW README'si kalıcı değildir; ilk temel setup çalışmalarından birinde City Radar
-  README'si ile değiştirilir (ayrı feature gerekmez). En az: projenin amacı, repo yapısı,
-  prerequisites, local setup, check/test komutları, mimari dokümanlara linkler.
+- **Dependabot:** NuGet + GitHub Actions eklendi (spec 0001); npm mobil setup feature'ında eklenir.
+- **README:** City Radar README'si yazıldı (spec 0001); mobil setup feature'ı mobil bölümlerini doldurur.
 - **Release requirement (v1'i bloklamaz, store yayınını bloklar):** gizlilik politikası, KVKK
   bilgilendirmeleri, app store privacy declarations (`docs/security.md`).
 - **Remote / branch protection:** `docs/git.md` açık aksiyonları.

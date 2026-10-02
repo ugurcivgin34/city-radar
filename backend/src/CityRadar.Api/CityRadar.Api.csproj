@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <ItemGroup>
+    <ProjectReference Include="..\CityRadar.Shared\CityRadar.Shared.csproj" />
+    <ProjectReference Include="..\CityRadar.Parking\CityRadar.Parking.csproj" />
+    <ProjectReference Include="..\CityRadar.Traffic\CityRadar.Traffic.csproj" />
+    <ProjectReference Include="..\CityRadar.Infrastructure\CityRadar.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>

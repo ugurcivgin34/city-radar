@@ -26,9 +26,35 @@ zorunda değil; amaç hangi kriterin hangi testle doğrulandığının görüleb
 - **Provider adapter testleri:** gerçek sağlayıcı araştırıldıktan sonra (OD-1) kayıtlı JSON
   fixture'larıyla. Fixture'lar gerçek formatı temsil eder, network gerektirmez, küçük/minimal
   tutulur ve hangi provider/şema örneğinden üretildiği anlaşılır.
-- **Zaman:** `TimeProvider` + testlerde fake zaman (`FakeTimeProvider`). Doğrudan clock
-  kullanımı analyzer/architecture check ile yakalanır; bu aşırı karmaşıksa `scripts/check`
-  içinde güvenilir bir statik kontrol kullanılır.
+- **Zaman:** `TimeProvider` + testlerde fake zaman (`FakeTimeProvider`). Üretim kodunda
+  `DateTime.Now/UtcNow/Today` ve `DateTimeOffset.Now/UtcNow` derleyici hatasıdır
+  (`BannedApiAnalyzers`, `backend/BannedSymbols.txt`); test projeleri muaftır.
+- **Runner:** Microsoft.Testing.Platform (`backend/global.json`); komut
+  `cd backend && dotnet test --solution CityRadar.slnx`. Sıfır test çalıştıran proje hata verir
+  (exit code 8).
+- **Zero-test istisnası:** yalnızca bilerek boş bırakılan `CityRadar.{Shared,Parking,Traffic,Infrastructure}.Tests`
+  projelerinde `--ignore-exit-code 8` bulunabilir; `CityRadar.Api.Tests` ve
+  `CityRadar.Architecture.Tests` bu istisnayı hiçbir zaman almaz. Bu projelerden birine ilk testi
+  ekleyen feature'ın planı, açık bir madde/kabul kriteri olarak, o projede **zero-test istisnasını
+  kaldırır ve `--minimum-expected-tests 1`'i etkinleştirir**. `ZeroTestExceptionTests` istisna ile kod
+  bir arada durduğu sürece, `MinimumExpectedTestsTests` ise istisnası olmayan bir projede aktif
+  minimum-test ayarı yoksa check'i kırar.
+- **Threat model (spec 0001):** zero-test guard **kazara drift**'e karşıdır — bir geliştiricinin
+  hatayı çözmeye çalışırken ekleyebileceği normal configuration (ör. `--ignore-exit-code 8;9`).
+  Guard'ın veya configuration'ın bilinçli olarak değiştirilmesini tooling tek başına engellemez;
+  kasıtlı bypass independent review, protected tests ve review/CI sürecinde yakalanır. Yeni bulgular
+  bu modele göre triage edilir.
+- **Birincil güvence (plan 0001 amendment 2):** istisnası olmayan her test projesi
+  `--minimum-expected-tests 1` ile çalışır; sıfır test exit 8/9 üretir ve dışarıdan enjekte edilen
+  bir "exit code 8'i yok say" ayarı bunu yeşile çeviremez. `scripts/check` testleri kontrollü
+  ortamda başlatır (`env -u TESTINGPLATFORM_EXITCODE_IGNORE`, `--no-launch-profile`).
+  `MinimumExpectedTestsTests` bu ayarların varlığını otomatik doğrular.
+- **İkincil savunma (scanner):** istisna genel olarak — environment variable ataması, paylaşılan
+  script (`scripts/`), CI configuration (`.github/`), `Directory.Build.*`, `*.rsp`,
+  `launchSettings.json` / `*.run.json` üzerinden — verilemez; `ZeroTestExceptionTests` bu repo
+  configuration yüzeylerini tarar (`.vs/`, `TestResults/`, `bin/`, `obj/`, `*.user` gibi yerel
+  dosyalar sonucu etkilemez). Scanner'ın her olası enjeksiyon yüzeyini bilmesi beklenmez; yeni bir
+  yüzey bulunması birincil güvenceyi bozmaz.
 
 **Mobil**
 - `jest-expo` + React Native Testing Library.

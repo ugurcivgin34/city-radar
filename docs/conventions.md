@@ -71,12 +71,14 @@
 
 ## Enforced by tooling
 `scripts/check` tek giriş noktasıdır; CI ve lokal aynı adımları çalıştırır (`scripts/check.conf`).
-- **Backend:** restore · build (`TreatWarningsAsErrors`, nullable, analyzers) · test (architecture
-  testleri dahil) · `dotnet format --verify-no-changes`.
+- **Backend** (`backend/` içinde çalışır; `backend/global.json` SDK'yı ve test runner'ı —
+  Microsoft.Testing.Platform — pinler): restore · build (`TreatWarningsAsErrors`, nullable,
+  analyzers, saat kuralı = `BannedApiAnalyzers` RS0030) · `dotnet format --verify-no-changes` ·
+  test (architecture testleri dahil). Paket sürümleri yalnızca `backend/Directory.Packages.props`'ta (CPM).
 - **Mobil:** lockfile doğrulamalı install (`npm ci`) · `tsc --noEmit` · ESLint (FD-5, FD-6, FD-8
   dahil) · Prettier check · testler (oluşturulduğunda).
 - **Güvenlik:** dependency vulnerability taraması ayrı giriş noktasında — `scripts/security-check`
   (`docs/security.md`); CI ikisini de çalıştırır.
-- Bu adımların araçları (analyzer ayarları, ESLint kuralları, deny-list ve clock kontrol
-  script'leri) ilgili setup feature'larının planında oluşturulur; o zamana kadar `check.conf`
-  ilgili adımı görünür şekilde `SKIP` eder.
+- Backend adımları hiçbir zaman `SKIP` etmez. Mobil adımların araçları (ESLint kuralları, FD-7
+  deny-list) mobil setup feature'ında oluşturulur; o zamana kadar `check.conf` onları görünür
+  şekilde `SKIP` eder.
