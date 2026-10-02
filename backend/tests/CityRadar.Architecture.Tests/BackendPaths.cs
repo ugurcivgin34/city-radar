@@ -12,6 +12,8 @@ internal static class BackendPaths
 
     public static string Solution => Path.Combine(Root, "CityRadar.slnx");
 
+    public static string Repository => Directory.GetParent(Root)!.FullName;
+
     private static string FindRoot()
     {
         for (var dir = new DirectoryInfo(AppContext.BaseDirectory); dir is not null; dir = dir.Parent)

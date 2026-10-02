@@ -40,12 +40,30 @@ public sealed partial class ZeroTestExceptionTests
     [Fact]
     public void ZeroTestException_IsNotSetBackendWide()
     {
-        var offenders = Directory.GetFiles(BackendPaths.Root, "Directory.Build.*", SearchOption.AllDirectories)
-            .Where(file => IgnoresZeroTests(File.ReadAllText(file)))
-            .ToList();
+        var sharedFiles = Directory.GetFiles(BackendPaths.Root, "Directory.Build.*", SearchOption.AllDirectories)
+            .Where(file => !IsBuildOutput(Path.GetRelativePath(BackendPaths.Root, file)))
+            .Concat(RepositoryFiles("scripts"))
+            .Concat(RepositoryFiles(".github"));
+
+        var offenders = sharedFiles.Where(file => IgnoresZeroTests(File.ReadAllText(file))).ToList();
 
         Assert.True(offenders.Count == 0, "Zero-test exception must not be shared: " + string.Join(", ", offenders));
     }
+
+    [Fact]
+    public void ZeroTestException_IsNotSetThroughTheEnvironment()
+    {
+        var offenders = RepositoryFiles("backend")
+            .Concat(RepositoryFiles("scripts"))
+            .Concat(RepositoryFiles(".github"))
+            .Where(file => File.ReadAllText(file).Contains(ExitCodeIgnoreVariable, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        Assert.True(offenders.Count == 0, ExitCodeIgnoreVariable + " must not be set: " + string.Join(", ", offenders));
+    }
+
+    // Built by concatenation so this source file never matches its own scan.
+    private static readonly string ExitCodeIgnoreVariable = "TESTINGPLATFORM_" + "EXITCODE_IGNORE";
 
     private static bool IgnoresZeroTests(string text) => IgnoreExitCode8().IsMatch(text);
 
@@ -53,12 +71,19 @@ public sealed partial class ZeroTestExceptionTests
         Directory.EnumerateFiles(projectDirectory, "*.cs", SearchOption.AllDirectories)
             .Any(file => !IsBuildOutput(Path.GetRelativePath(projectDirectory, file)));
 
-    private static bool IsBuildOutput(string relativePath)
+    private static IEnumerable<string> RepositoryFiles(string directory)
     {
-        var first = relativePath.Replace('\\', '/').Split('/')[0];
-        return first is "bin" or "obj";
+        var root = Path.Combine(BackendPaths.Repository, directory);
+        return Directory.Exists(root)
+            ? Directory.EnumerateFiles(root, "*", SearchOption.AllDirectories)
+                .Where(file => !IsBuildOutput(Path.GetRelativePath(root, file)))
+            : [];
     }
 
-    [GeneratedRegex(@"--ignore-exit-code\s+8\b")]
+    private static bool IsBuildOutput(string relativePath) =>
+        relativePath.Replace('\\', '/').Split('/').Any(segment => segment is "bin" or "obj");
+
+    // Every MTP form that ignores exit code 8: "8", "=8", "2;8", "\"2;8\"", "3,8".
+    [GeneratedRegex(@"--ignore-exit-code(?:[ \t]*=[ \t]*|[ \t]+)[""']?(?:\d+[;,][ \t]*)*8(?!\d)")]
     private static partial Regex IgnoreExitCode8();
 }
