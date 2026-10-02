@@ -40,12 +40,10 @@ public sealed partial class ZeroTestExceptionTests
     [Fact]
     public void ZeroTestException_IsNotSetBackendWide()
     {
-        var sharedFiles = Directory.GetFiles(BackendPaths.Root, "Directory.Build.*", SearchOption.AllDirectories)
-            .Where(file => !IsBuildOutput(Path.GetRelativePath(BackendPaths.Root, file)))
-            .Concat(RepositoryFiles("scripts"))
-            .Concat(RepositoryFiles(".github"));
-
-        var offenders = sharedFiles.Where(file => IgnoresZeroTests(File.ReadAllText(file))).ToList();
+        var offenders = ConfigurationSurfaces()
+            .Where(file => !IsTestProjectFile(file))
+            .Where(file => IgnoresZeroTests(File.ReadAllText(file)))
+            .ToList();
 
         Assert.True(offenders.Count == 0, "Zero-test exception must not be shared: " + string.Join(", ", offenders));
     }
@@ -53,9 +51,7 @@ public sealed partial class ZeroTestExceptionTests
     [Fact]
     public void ZeroTestException_IsNotSetThroughTheEnvironment()
     {
-        var offenders = RepositoryFiles("backend")
-            .Concat(RepositoryFiles("scripts"))
-            .Concat(RepositoryFiles(".github"))
+        var offenders = ConfigurationSurfaces()
             .Where(file => File.ReadAllText(file).Contains(ExitCodeIgnoreVariable, StringComparison.OrdinalIgnoreCase))
             .ToList();
 
@@ -65,23 +61,41 @@ public sealed partial class ZeroTestExceptionTests
     // Built by concatenation so this source file never matches its own scan.
     private static readonly string ExitCodeIgnoreVariable = "TESTINGPLATFORM_" + "EXITCODE_IGNORE";
 
+    // Only repository configuration surfaces that can actually carry the exception (review 2,
+    // B-2): IDE state, test results, build output, *.user and stray local files never decide
+    // the check, so the same commit gives the same result locally and in CI.
+    private static readonly string[] BackendConfigurationPatterns = ["*.csproj", "*.props", "*.targets", "global.json", "testconfig.json"];
+
+    private static readonly string[] LocalOnlySegments = ["bin", "obj", ".vs", "TestResults", "node_modules"];
+
     private static bool IgnoresZeroTests(string text) => IgnoreExitCode8().IsMatch(text);
 
     private static bool HasSourceFiles(string projectDirectory) =>
         Directory.EnumerateFiles(projectDirectory, "*.cs", SearchOption.AllDirectories)
-            .Any(file => !IsBuildOutput(Path.GetRelativePath(projectDirectory, file)));
+            .Any(file => !IsLocalOnly(Path.GetRelativePath(projectDirectory, file)));
 
-    private static IEnumerable<string> RepositoryFiles(string directory)
+    private static IEnumerable<string> ConfigurationSurfaces()
     {
-        var root = Path.Combine(BackendPaths.Repository, directory);
-        return Directory.Exists(root)
-            ? Directory.EnumerateFiles(root, "*", SearchOption.AllDirectories)
-                .Where(file => !IsBuildOutput(Path.GetRelativePath(root, file)))
+        var backend = BackendConfigurationPatterns
+            .SelectMany(pattern => Directory.EnumerateFiles(BackendPaths.Root, pattern, SearchOption.AllDirectories))
+            .Where(file => !IsLocalOnly(Path.GetRelativePath(BackendPaths.Root, file)));
+
+        var scripts = Directory.EnumerateFiles(Path.Combine(BackendPaths.Repository, "scripts"), "*", SearchOption.TopDirectoryOnly);
+
+        var workflowDirectory = Path.Combine(BackendPaths.Repository, ".github", "workflows");
+        var workflows = Directory.Exists(workflowDirectory)
+            ? Directory.EnumerateFiles(workflowDirectory, "*.yml").Concat(Directory.EnumerateFiles(workflowDirectory, "*.yaml"))
             : [];
+
+        return backend.Concat(scripts).Concat(workflows).Distinct(StringComparer.OrdinalIgnoreCase);
     }
 
-    private static bool IsBuildOutput(string relativePath) =>
-        relativePath.Replace('\\', '/').Split('/').Any(segment => segment is "bin" or "obj");
+    private static bool IsTestProjectFile(string file) =>
+        file.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase)
+        && string.Equals(Path.GetDirectoryName(Path.GetDirectoryName(file)), BackendPaths.Tests, StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsLocalOnly(string relativePath) =>
+        relativePath.Replace('\\', '/').Split('/').Any(segment => LocalOnlySegments.Contains(segment, StringComparer.OrdinalIgnoreCase));
 
     // The guard itself is proven here, not only by whatever the repository happens to contain
     // (review 2, B-1). Deliberate obfuscation (%3B, &quot;, property indirection) is out of scope.
