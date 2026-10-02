@@ -36,11 +36,18 @@ zorunda değil; amaç hangi kriterin hangi testle doğrulandığının görüleb
   projelerinde `--ignore-exit-code 8` bulunabilir; `CityRadar.Api.Tests` ve
   `CityRadar.Architecture.Tests` bu istisnayı hiçbir zaman almaz. Bu projelerden birine ilk testi
   ekleyen feature'ın planı istisnanın kaldırılmasını açık bir madde/kabul kriteri olarak yazar;
-  `ZeroTestExceptionTests` istisna ile kod bir arada durduğu sürece check'i kırar. İstisna genel
-  olarak — environment variable (`TESTINGPLATFORM_EXITCODE_IGNORE`), paylaşılan bir script
-  (`scripts/`), CI configuration (`.github/workflows/`) veya `Directory.Build.*` üzerinden —
-  verilemez; `ZeroTestExceptionTests` repo configuration yüzeylerini tarar ve bunu da kırar
-  (`.vs/`, `TestResults/`, `bin/`, `obj/`, `*.user` gibi yerel dosyalar sonucu etkilemez).
+  `ZeroTestExceptionTests` istisna ile kod bir arada durduğu sürece check'i kırar.
+- **Birincil güvence (plan 0001 amendment 2):** istisnası olmayan her test projesi
+  `--minimum-expected-tests 1` ile çalışır; sıfır test exit 8/9 üretir ve dışarıdan enjekte edilen
+  bir "exit code 8'i yok say" ayarı bunu yeşile çeviremez. `scripts/check` testleri kontrollü
+  ortamda başlatır (`env -u TESTINGPLATFORM_EXITCODE_IGNORE`, `--no-launch-profile`).
+  `MinimumExpectedTestsTests` bu ayarların varlığını otomatik doğrular.
+- **İkincil savunma (scanner):** istisna genel olarak — environment variable ataması, paylaşılan
+  script (`scripts/`), CI configuration (`.github/`), `Directory.Build.*`, `*.rsp`,
+  `launchSettings.json` / `*.run.json` üzerinden — verilemez; `ZeroTestExceptionTests` bu repo
+  configuration yüzeylerini tarar (`.vs/`, `TestResults/`, `bin/`, `obj/`, `*.user` gibi yerel
+  dosyalar sonucu etkilemez). Scanner'ın her olası enjeksiyon yüzeyini bilmesi beklenmez; yeni bir
+  yüzey bulunması birincil güvenceyi bozmaz.
 
 **Mobil**
 - `jest-expo` + React Native Testing Library.
