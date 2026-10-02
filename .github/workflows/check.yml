@@ -1,0 +1,51 @@
+name: check
+on:
+  push:
+  pull_request:
+
+# Required checks for main (docs/git.md): doctor --strict, scripts/check, scripts/security-check.
+# Local and CI run the same commands; toolchain steps activate once the projects exist.
+
+jobs:
+  doctor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Workspace health (spec/plan gates are failures in CI)
+        run: ./scripts/doctor --strict
+
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET (SDK pinned by backend/global.json)
+        if: hashFiles('backend/global.json') != ''
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: backend/global.json
+      - name: Setup Node (version pinned by mobile/.nvmrc)
+        if: hashFiles('mobile/.nvmrc') != ''
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: mobile/.nvmrc
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+      - name: Verification contract
+        run: ./scripts/check
+
+  security-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET (SDK pinned by backend/global.json)
+        if: hashFiles('backend/global.json') != ''
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: backend/global.json
+      - name: Setup Node (version pinned by mobile/.nvmrc)
+        if: hashFiles('mobile/.nvmrc') != ''
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: mobile/.nvmrc
+      - name: Dependency vulnerability scan
+        run: ./scripts/security-check
