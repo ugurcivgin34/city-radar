@@ -16,6 +16,8 @@ if (args.Length != 2 || !int.TryParse(args[1], out var listExitCode))
 
 if (listExitCode != 0)
 {
+    // `dotnet package list --format json` writes its errors to stdout, i.e. into this file.
+    ShowRawOutput(args[0]);
     return Infra($"`dotnet package list` exited with {listExitCode} (advisory/registry unreachable?)");
 }
 
@@ -26,6 +28,7 @@ try
 }
 catch (Exception ex) when (ex is IOException or JsonException)
 {
+    ShowRawOutput(args[0]);
     return Infra("could not read the package list JSON: " + ex.Message);
 }
 
@@ -84,6 +87,22 @@ static IEnumerable<JsonElement> Elements(JsonElement parent, string name) =>
     parent.TryGetProperty(name, out var array) && array.ValueKind == JsonValueKind.Array
         ? array.EnumerateArray()
         : [];
+
+// Root cause for infra failures (DNS, proxy, auth, 5xx): the raw tool output, capped.
+static void ShowRawOutput(string path)
+{
+    const int MaxChars = 4000;
+    try
+    {
+        var raw = File.ReadAllText(path).Trim();
+        Console.Error.WriteLine("  dotnet package list output:");
+        Console.Error.WriteLine(raw.Length > MaxChars ? raw[..MaxChars] + " ..." : raw);
+    }
+    catch (IOException ex)
+    {
+        Console.Error.WriteLine("  (raw output unavailable: " + ex.Message + ")");
+    }
+}
 
 static int Infra(string message)
 {
