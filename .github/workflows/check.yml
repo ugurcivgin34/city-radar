@@ -25,7 +25,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - name: Setup .NET (SDK pinned by backend/global.json)
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
           global-json-file: backend/global.json
       - name: Setup Node (version pinned by mobile/.nvmrc)
@@ -43,7 +43,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - name: Setup .NET (SDK pinned by backend/global.json)
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
           global-json-file: backend/global.json
       - name: Setup Node (version pinned by mobile/.nvmrc)
