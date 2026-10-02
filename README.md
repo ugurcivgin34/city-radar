@@ -30,6 +30,20 @@ Kurallar ve süreç için giriş noktası: [`AGENTS.md`](AGENTS.md).
 
 ## Local setup
 
+**Telemetri kapalı çalışın (minimum data, [`docs/security.md`](docs/security.md)).** `scripts/check`,
+`scripts/security-check` ve CI bunu zaten yapıyor; `dotnet` komutlarını doğrudan çalıştırırken
+aynı iki değişkeni kendi shell'inizde ayarlayın:
+
+```sh
+# bash / Git Bash
+export DOTNET_CLI_TELEMETRY_OPTOUT=1 TESTINGPLATFORM_TELEMETRY_OPTOUT=1
+```
+
+```powershell
+# PowerShell (kalıcı yapmak için profilinize ekleyin)
+$env:DOTNET_CLI_TELEMETRY_OPTOUT = "1"; $env:TESTINGPLATFORM_TELEMETRY_OPTOUT = "1"
+```
+
 ```sh
 git clone https://github.com/ugurcivgin34/city-radar.git
 cd city-radar
