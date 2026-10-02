@@ -55,7 +55,7 @@ public sealed class ModuleDependencyTests
             .Check(ModuleArchitecture.Model);
 
     [Fact]
-    public void ApiContracts_DoNotExpose_ModuleTypes() =>
+    public void ApiContracts_DoNotDependOn_ModuleTypes() =>
         Types().That().ResideInNamespaceMatching(ApiContractNamespaces)
             .Should().NotDependOnAnyTypesThat().ResideInAssembly(ModuleArchitecture.Shared, ModuleArchitecture.Parking, ModuleArchitecture.Traffic)
             .WithoutRequiringPositiveResults()
