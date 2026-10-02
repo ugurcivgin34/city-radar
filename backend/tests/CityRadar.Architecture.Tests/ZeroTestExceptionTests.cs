@@ -80,7 +80,7 @@ public sealed partial class ZeroTestExceptionTests
 
     private static readonly string[] LocalOnlySegments = ["bin", "obj", ".vs", "TestResults", "node_modules"];
 
-    internal static bool IgnoresZeroTests(string text) => IgnoreExitCode8().IsMatch(text);
+    internal static bool IgnoresZeroTests(string text) => IgnoreZeroTestExitCode().IsMatch(text);
 
     private static bool AssignsExitCodeIgnoreVariable(string text) => ExitCodeIgnoreAssignment().IsMatch(text);
 
@@ -113,7 +113,9 @@ public sealed partial class ZeroTestExceptionTests
         relativePath.Replace('\\', '/').Split('/').Any(segment => LocalOnlySegments.Contains(segment, StringComparer.OrdinalIgnoreCase));
 
     // The guard itself is proven here, not only by whatever the repository happens to contain
-    // (review 2, B-1). Deliberate obfuscation (%3B, &quot;, property indirection) is out of scope.
+    // (review 2, B-1). Threat model (spec 0001): accidental drift such as MTP's own suggestion
+    // "--ignore-exit-code 8;9". Deliberate obfuscation (%3B, &quot;, property indirection,
+    // mixed-case env) is a review concern, not tooling's.
     [Theory]
     [InlineData("--ignore-exit-code 8")]
     [InlineData("--ignore-exit-code=8")]
@@ -126,23 +128,34 @@ public sealed partial class ZeroTestExceptionTests
     [InlineData("--ignore-exit-code\n    8")]
     [InlineData("--ignore-exit-code\r\n  2;\r\n  8")]
     [InlineData("$(TestingPlatformCommandLineArguments) --ignore-exit-code 8")]
-    public void Guard_RecognizesEveryFormThatIgnoresExitCode8(string text) =>
+    [InlineData("--ignore-exit-code 9")]
+    [InlineData("--ignore-exit-code 2;9")]
+    [InlineData("--ignore-exit-code 8;9")]
+    [InlineData("--ignore-exit-code 9;8")]
+    [InlineData("--ignore-exit-code:9")]
+    public void Guard_RecognizesEveryFormThatIgnoresAZeroTestExitCode(string text) =>
         Assert.True(IgnoresZeroTests(text), "not recognized: " + text);
 
     [Theory]
     [InlineData("--ignore-exit-code 18")]
     [InlineData("--ignore-exit-code 81")]
     [InlineData("--ignore-exit-code 2;18")]
+    [InlineData("--ignore-exit-code 19")]
+    [InlineData("--ignore-exit-code 91")]
+    [InlineData("--ignore-exit-code 2;19")]
     [InlineData("--ignore-exit-code 2")]
     [InlineData("--ignore-exit-code 28")]
     [InlineData("--ignore-exit-codes 8")]
     [InlineData("--minimum-expected-tests 8")]
-    public void Guard_IgnoresFormsThatDoNotIgnoreExitCode8(string text) =>
+    [InlineData("--minimum-expected-tests 9")]
+    public void Guard_IgnoresFormsThatDoNotIgnoreAZeroTestExitCode(string text) =>
         Assert.False(IgnoresZeroTests(text), "false positive: " + text);
 
-    // Separator: whitespace (incl. newlines), "=" or ":"; list items separated by ";" or ",".
-    [GeneratedRegex(@"--ignore-exit-code(?:\s*[=:]\s*|\s+)[""']?(?:\d+\s*[;,]\s*)*8(?!\d)")]
-    private static partial Regex IgnoreExitCode8();
+    // Exit 8 = zero tests ran; exit 9 = fewer than --minimum-expected-tests (amendment 2). An ignore
+    // list containing either defeats the zero-test guarantee. Separator: whitespace (incl. newlines),
+    // "=" or ":"; list items separated by ";" or ",".
+    [GeneratedRegex(@"--ignore-exit-code(?:\s*[=:]\s*|\s+)[""']?(?:\d+\s*[;,]\s*)*[89](?!\d)")]
+    private static partial Regex IgnoreZeroTestExitCode();
 
     // NAME=…, NAME: …, "NAME": …, $env:NAME = … (shell, MSBuild, YAML, JSON, PowerShell).
     [GeneratedRegex(@"TESTINGPLATFORM_EXITCODE_IGNORE[""']?\s*[=:]", RegexOptions.IgnoreCase)]
