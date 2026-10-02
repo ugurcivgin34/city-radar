@@ -14,14 +14,17 @@ echo "==> nuget-vulnerabilities"
 # `dotnet package list` exits 0 even when it finds vulnerabilities, so its JSON is parsed by
 # scripts/nuget-audit.cs. Commands run inside backend/ so backend/global.json pins the SDK.
 # `dotnet package list` is the .NET 10 SDK syntax; re-check it when the SDK pin changes.
+# The advisory query gets a fresh, empty NuGet HTTP cache every run: a warm cache would answer
+# offline and could pass a run whose advisory source is unreachable (fail-open).
 nuget_json=$(mktemp)
 nuget_err=$(mktemp)
+nuget_cache=$(mktemp -d)
 if ! (cd backend && dotnet restore CityRadar.slnx >"$nuget_err" 2>&1); then
   cat "$nuget_err"
   echo "SECURITY INFRA FAILURE: dotnet restore failed (registry unreachable?)" >&2
   failed=1
 else
-  (cd backend && dotnet package list --project CityRadar.slnx --vulnerable --include-transitive --format json >"$nuget_json" 2>"$nuget_err")
+  (cd backend && NUGET_HTTP_CACHE_PATH="$nuget_cache" dotnet package list --project CityRadar.slnx --vulnerable --include-transitive --format json >"$nuget_json" 2>"$nuget_err")
   list_exit=$?
   cat "$nuget_err"
   (cd backend && dotnet run --file ../scripts/nuget-audit.cs -- "$nuget_json" "$list_exit")
@@ -31,7 +34,7 @@ else
     *) echo "SECURITY INFRA FAILURE: NuGet vulnerability audit could not complete" >&2; failed=1 ;;
   esac
 fi
-rm -f "$nuget_json" "$nuget_err"
+rm -rf "$nuget_json" "$nuget_err" "$nuget_cache"
 
 echo "==> npm-audit"
 if [ -f mobile/package.json ]; then
