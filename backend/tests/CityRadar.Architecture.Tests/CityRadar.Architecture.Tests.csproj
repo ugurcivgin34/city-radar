@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="TngTech.ArchUnitNET.xUnitV3" />
+    <PackageReference Include="xunit.v3" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\CityRadar.Shared\CityRadar.Shared.csproj" />
+    <ProjectReference Include="..\..\src\CityRadar.Parking\CityRadar.Parking.csproj" />
+    <ProjectReference Include="..\..\src\CityRadar.Traffic\CityRadar.Traffic.csproj" />
+    <ProjectReference Include="..\..\src\CityRadar.Infrastructure\CityRadar.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\CityRadar.Api\CityRadar.Api.csproj" />
+  </ItemGroup>
+</Project>

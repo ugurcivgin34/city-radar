@@ -8,6 +8,7 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/CityRadar.Api.Tests/CityRadar.Api.Tests.csproj" />
+    <Project Path="tests/CityRadar.Architecture.Tests/CityRadar.Architecture.Tests.csproj" />
     <Project Path="tests/CityRadar.Infrastructure.Tests/CityRadar.Infrastructure.Tests.csproj" />
     <Project Path="tests/CityRadar.Parking.Tests/CityRadar.Parking.Tests.csproj" />
     <Project Path="tests/CityRadar.Shared.Tests/CityRadar.Shared.Tests.csproj" />
