@@ -15,6 +15,9 @@ Thumbs.db
 # Claude Code personal settings (shared settings.json IS committed after init)
 .claude/settings.local.json
 
+# Claude Code worktrees
+.claude/worktrees/
+
 # .NET (backend/)
 bin/
 obj/
