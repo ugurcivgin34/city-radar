@@ -83,7 +83,35 @@ public sealed partial class ZeroTestExceptionTests
     private static bool IsBuildOutput(string relativePath) =>
         relativePath.Replace('\\', '/').Split('/').Any(segment => segment is "bin" or "obj");
 
-    // Every MTP form that ignores exit code 8: "8", "=8", "2;8", "\"2;8\"", "3,8".
-    [GeneratedRegex(@"--ignore-exit-code(?:[ \t]*=[ \t]*|[ \t]+)[""']?(?:\d+[;,][ \t]*)*8(?!\d)")]
+    // The guard itself is proven here, not only by whatever the repository happens to contain
+    // (review 2, B-1). Deliberate obfuscation (%3B, &quot;, property indirection) is out of scope.
+    [Theory]
+    [InlineData("--ignore-exit-code 8")]
+    [InlineData("--ignore-exit-code=8")]
+    [InlineData("--ignore-exit-code:8")]
+    [InlineData("--ignore-exit-code 2;8")]
+    [InlineData("--ignore-exit-code \"2;8\"")]
+    [InlineData("--ignore-exit-code 3,8")]
+    [InlineData("--ignore-exit-code 8;2")]
+    [InlineData("--ignore-exit-code 2 ;8")]
+    [InlineData("--ignore-exit-code\n    8")]
+    [InlineData("--ignore-exit-code\r\n  2;\r\n  8")]
+    [InlineData("$(TestingPlatformCommandLineArguments) --ignore-exit-code 8")]
+    public void Guard_RecognizesEveryFormThatIgnoresExitCode8(string text) =>
+        Assert.True(IgnoresZeroTests(text), "not recognized: " + text);
+
+    [Theory]
+    [InlineData("--ignore-exit-code 18")]
+    [InlineData("--ignore-exit-code 81")]
+    [InlineData("--ignore-exit-code 2;18")]
+    [InlineData("--ignore-exit-code 2")]
+    [InlineData("--ignore-exit-code 28")]
+    [InlineData("--ignore-exit-codes 8")]
+    [InlineData("--minimum-expected-tests 8")]
+    public void Guard_IgnoresFormsThatDoNotIgnoreExitCode8(string text) =>
+        Assert.False(IgnoresZeroTests(text), "false positive: " + text);
+
+    // Separator: whitespace (incl. newlines), "=" or ":"; list items separated by ";" or ",".
+    [GeneratedRegex(@"--ignore-exit-code(?:\s*[=:]\s*|\s+)[""']?(?:\d+\s*[;,]\s*)*8(?!\d)")]
     private static partial Regex IgnoreExitCode8();
 }
