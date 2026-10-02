@@ -64,11 +64,18 @@ atılabilir" anlamına gelmez. Sonrasında tüm iş branch + PR ile yürür.
 - Repo tek geliştiricili: ikinci insan reviewer zorunlu değil; bağımsız review ANEW workflow'unda
   zaten uygulanır. Ekip büyürse required human review eklenir (strict tetikleyicileri: ADR 0005).
 
-## Branch protection (GitHub remote oluşturulduktan sonra)
-`main` için: PR zorunlu · required checks zorunlu (yukarıdaki üçü) · force push kapalı · branch
-deletion kısıtlı.
+## Branch protection — GitHub tarafından ZORLANMIYOR (ADR 0006)
+Hedeflenen kurallar `main` için geçerlidir: PR zorunlu · required checks (yukarıdaki üçü) · force
+push yok · branch silme yok. **Ancak** repo private ve ücretsiz planda olduğu için GitHub branch
+protection/rulesets kullanılamıyor (API 403). Bu kurallar **süreçle** uygulanır:
+- Zorlanmayan: `main`'e doğrudan commit/push, force push, `main`'in silinmesi, check'leri yeşil
+  olmayan PR'ın merge edilmesi — GitHub bunlara izin verir.
+- Telafi: CI üç check'i her push/PR'da çalıştırır (kırmızı görünür, merge'i engellemez); merge
+  yalnızca PR ile, squash, PR head commit'inde üç check de yeşilken ve merge eden bunu merge öncesi
+  doğrulayarak yapılır; agent `main`'e commit atmaz ve force push yapmaz; bağımsız review ve PR
+  şablonundaki gate kayıtları.
+- Repo public olursa veya Pro/Team planına geçilirse protection hemen açılır (ADR 0006 revisit
+  triggers).
 
-**Açık aksiyonlar (bootstrap sonrası, insan tarafından):**
-1. GitHub repository oluştur. 2. `origin` remote ekle. 3. Bootstrap commit'ini push et.
-4. CI workflow'larını etkinleştir. 5. `main` branch protection'ı aç.
-6. Bundan sonra feature/fix çalışmalarını branch + PR üzerinden yürüt.
+Bootstrap açık aksiyonları tamamlandı (2026-10-03): repo, `origin`, bootstrap push, CI. 5. adım
+(`main` branch protection) plan kısıtı nedeniyle yapılamadı — yukarıdaki süreç kuralları geçerlidir.
