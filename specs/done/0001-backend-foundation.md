@@ -1,6 +1,6 @@
 # Spec 0001 — Backend temel kurulumu
 
-- Status: In progress
+- Status: Shipped
 - Mode: lite
 - Plan: `specs/plans/0001-plan.md`
 
@@ -71,71 +71,73 @@ yapılmayan: hiçbir iş davranışı, endpoint, sağlayıcı entegrasyonu, doma
   aksiyondur (`docs/git.md`).
 
 ## Acceptance criteria
-- [ ] AC-1 — Temiz bir checkout'ta `./scripts/check` backend adımlarının hiçbirini `SKIP` etmeden
+- [x] AC-1 — Temiz bir checkout'ta `./scripts/check` backend adımlarının hiçbirini `SKIP` etmeden
   çalıştırır ve yeşil biter.
-- [ ] AC-2 — Solution beş modül projesini ve altı test projesini (`CityRadar.Shared.Tests`,
+- [x] AC-2 — Solution beş modül projesini ve altı test projesini (`CityRadar.Shared.Tests`,
   `.Parking.Tests`, `.Traffic.Tests`, `.Infrastructure.Tests`, `.Api.Tests`,
   `.Architecture.Tests`) içerir; modül referansları tam olarak şu yöndedir: Parking→Shared,
   Traffic→Shared, Infrastructure→{Parking, Traffic, Shared}, Api→{tüm modüller}; Shared hiçbir
   modüle referans vermez.
-- [ ] AC-3 — `global.json` somut bir .NET 10 SDK sürümü ve `rollForward: latestFeature` içerir.
+- [x] AC-3 — `global.json` somut bir .NET 10 SDK sürümü ve `rollForward: latestFeature` içerir.
   Backend komutları çalıştırıldığında: pinlenen sürüm veya aynı 10.0 hattında daha yeni bir
   patch/feature band seçilir (`dotnet --version` bunu gösterir); bu koşulu sağlayan bir SDK yoksa
   (ör. pin geçici olarak kurulu olmayan daha yüksek bir sürüme çekildiğinde) `dotnet` açık bir
   hatayla durur; başka bir major sürüme (9.x, 11.x) geçilmez.
-- [ ] AC-4 — Herhangi bir modül projesine bir compiler/analyzer warning'i üreten kod eklendiğinde
+- [x] AC-4 — Herhangi bir modül projesine bir compiler/analyzer warning'i üreten kod eklendiğinde
   `./scripts/check` kırmızı olur.
-- [ ] AC-5 — Restore sırasında NU1901–NU1904 vulnerability uyarısı oluşsa bile build bu yüzden
+- [x] AC-5 — Restore sırasında NU1901–NU1904 vulnerability uyarısı oluşsa bile build bu yüzden
   kırılmaz ve uyarı çıktıda görünür kalır.
-- [ ] AC-6 (FD-1) — Parking'den Traffic'e (veya tersi) referans eklendiğinde `./scripts/check`
+- [x] AC-6 (FD-1) — Parking'den Traffic'e (veya tersi) referans eklendiğinde `./scripts/check`
   kırmızı olur.
-- [ ] AC-7 (FD-2) — Parking, Traffic veya Shared'e CityRadar.Infrastructure, CityRadar.Api,
+- [x] AC-7 (FD-2) — Parking, Traffic veya Shared'e CityRadar.Infrastructure, CityRadar.Api,
   ASP.NET Core, `Microsoft.Extensions.Caching.*` veya `System.Net.Http` bağımlılığı eklendiğinde
   `./scripts/check` kırmızı olur.
-- [ ] AC-8 (FD-3) — (a) `CityRadar.Infrastructure.Providers.<Provider>.Dtos` altında `public`
+- [x] AC-8 (FD-3) — (a) `CityRadar.Infrastructure.Providers.<Provider>.Dtos` altında `public`
   bir tip tanımlandığında; (b) Api, Parking veya Traffic herhangi bir
   `CityRadar.Infrastructure.Providers.*` tipine bağımlı olduğunda `./scripts/check` kırmızı olur.
-- [ ] AC-9 (FD-4) — `CityRadar.Api.Contracts.*` içindeki bir tip Parking, Traffic veya Shared
+- [x] AC-9 (FD-4) — `CityRadar.Api.Contracts.*` içindeki bir tip Parking, Traffic veya Shared
   tiplerine **herhangi bir şekilde** (public yüzey, internal üye veya method gövdesi) bağımlı
   olduğunda `./scripts/check` kırmızı olur. Mapping `Contracts` namespace'i dışında yapılır.
   (Review F-2 triage'ında insan kararıyla "public yüzeyinde" ifadesinden bilinçli olarak
   sıkılaştırıldı — 2026-10-02, Uğur Okan Çivgin.)
-- [ ] AC-10 (saat kuralı) — Herhangi bir üretim projesinde `DateTime.Now`, `DateTime.UtcNow`,
+- [x] AC-10 (saat kuralı) — Herhangi bir üretim projesinde `DateTime.Now`, `DateTime.UtcNow`,
   `DateTime.Today`, `DateTimeOffset.Now` veya `DateTimeOffset.UtcNow` doğrudan kullanıldığında
   `./scripts/check` kırmızı olur; test projelerinde aynı kullanım check'i kırmaz.
-- [ ] AC-11 — Architecture testleri boş/vakum olarak geçemez: kontrol ettikleri assembly'ler
+- [x] AC-11 — Architecture testleri boş/vakum olarak geçemez: kontrol ettikleri assembly'ler
   yüklenemezse veya bulunamazsa testler başarısız olur.
-- [ ] AC-12 — Api host'u başlar ve tanımsız bir yola yapılan istek 404 döner; hiçbir endpoint
+- [x] AC-12 — Api host'u başlar ve tanımsız bir yola yapılan istek 404 döner; hiçbir endpoint
   (iş, diagnostic, OpenAPI UI) yanıt vermez. Yalnızca status code doğrulanır (gövde kapsam dışı).
-- [ ] AC-13 — `./scripts/security-check` NuGet adımını `SKIP` etmeden çalıştırır ve üç durumu
+- [x] AC-13 — `./scripts/security-check` NuGet adımını `SKIP` etmeden çalıştırır ve üç durumu
   ayırt eder: zafiyet yok → GREEN; zafiyet bulundu → RED; advisory/registry erişimi başarısız →
   RED ve çıktıda açıkça infrastructure/security-check failure olarak etiketli. Kanıt: geçici olarak
   eklenen bilinen zafiyetli bir paket (RED) ve erişilemeyen bir kaynakla çalıştırma (RED, infra).
-- [ ] AC-14 — CI workflow'u pinlenmiş SDK'yı (`global.json`) kurar ve `scripts/check` ile
+- [x] AC-14 — CI workflow'u pinlenmiş SDK'yı (`global.json`) kurar ve `scripts/check` ile
   `scripts/security-check`'i lokal ile aynı komutlarla çalıştırır. Kanıt: workflow incelemesi +
   aynı komutların lokal çıktısı + PR'daki CI koşusu.
-- [ ] AC-15 — Dependabot yapılandırması NuGet (`backend/`) ve GitHub Actions ekosistemlerini
+- [x] AC-15 — Dependabot yapılandırması NuGet (`backend/`) ve GitHub Actions ekosistemlerini
   kapsar; otomatik merge tanımlamaz.
-- [ ] AC-16 — README R-9'daki altı başlığı içerir ve anlatılan komutlar repodaki gerçek
+- [x] AC-16 — README R-9'daki altı başlığı içerir ve anlatılan komutlar repodaki gerçek
   komutlarla aynıdır.
-- [ ] AC-17 — Eklenen her dependency plan'da paket/gerekçe/alternatif/lisans ile listelenmiştir
+- [x] AC-17 — Eklenen her dependency plan'da paket/gerekçe/alternatif/lisans ile listelenmiştir
   ve hepsi lisans politikasına uyar.
 
 AC-4 ve AC-6–AC-10 için kanıt: geçici, commit'lenmeyen bir ihlalle check'in kırmızıya döndüğünün
 gösterilmesi ve geri alındıktan sonra yeşile dönmesi.
 
 ## Definition of Done
-- [ ] Every acceptance criterion mapped to proof (test or reproducible observation)
-- [ ] `scripts/check` green
-- [ ] Independent review done; real findings fixed, noise rejected with written rationale
-- [ ] Docs / ADRs updated if behavior or architecture changed
-- [ ] Spec moved to `specs/done/` (it becomes immutable there)
+- [x] Every acceptance criterion mapped to proof (test or reproducible observation)
+- [x] `scripts/check` green
+- [x] Independent review done; real findings fixed, noise rejected with written rationale
+- [x] Docs / ADRs updated if behavior or architecture changed
+- [x] Spec moved to `specs/done/` (it becomes immutable there)
+
+Ship kaydı (2026-10-03, Uğur Okan Çivgin): VERIFY — bağımsız QA, izole worktree — AC-1..AC-17 **17/17 Met**; criterion ↔ evidence tablosu PR #1 açıklamasında. Kanıtsız kriter yok. G-1, G-2, G-3 accepted / non-blocking; I-1..I-4 accepted / no action. CI (PR #1): doctor --strict, check, security-check GREEN. 5 bağımsız review turu; triage kayıtları `specs/plans/0001-plan.md`.
 
 ## Scorecard (fill at ship — honest numbers make the process improvable)
 | Metric | Value |
 |---|---|
-| Spec revisions | |
-| Fix rounds | |
-| Review findings: real / noise | |
-| Regressions introduced | |
-| Bugs escaped to production | |
+| Spec revisions | 3 |
+| Fix rounds | 4 |
+| Review findings: real / noise | 16 / 5 |
+| Regressions introduced | 0 |
+| Bugs escaped to production | 0 |
