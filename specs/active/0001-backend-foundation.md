@@ -88,7 +88,10 @@ yapılmayan: hiçbir iş davranışı, endpoint, sağlayıcı entegrasyonu, doma
   bir tip tanımlandığında; (b) Api, Parking veya Traffic herhangi bir
   `CityRadar.Infrastructure.Providers.*` tipine bağımlı olduğunda `./scripts/check` kırmızı olur.
 - [ ] AC-9 (FD-4) — `CityRadar.Api.Contracts.*` içindeki bir tip Parking, Traffic veya Shared
-  tiplerine public yüzeyinde bağımlı olduğunda `./scripts/check` kırmızı olur.
+  tiplerine **herhangi bir şekilde** (public yüzey, internal üye veya method gövdesi) bağımlı
+  olduğunda `./scripts/check` kırmızı olur. Mapping `Contracts` namespace'i dışında yapılır.
+  (Review F-2 triage'ında insan kararıyla "public yüzeyinde" ifadesinden bilinçli olarak
+  sıkılaştırıldı — 2026-10-02, Uğur Okan Çivgin.)
 - [ ] AC-10 (saat kuralı) — Herhangi bir üretim projesinde `DateTime.Now`, `DateTime.UtcNow`,
   `DateTime.Today`, `DateTimeOffset.Now` veya `DateTimeOffset.UtcNow` doğrudan kullanıldığında
   `./scripts/check` kırmızı olur; test projelerinde aynı kullanım check'i kırmaz.
