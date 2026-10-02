@@ -35,8 +35,10 @@ zorunda değil; amaç hangi kriterin hangi testle doğrulandığının görüleb
 - **Zero-test istisnası:** yalnızca bilerek boş bırakılan `CityRadar.{Shared,Parking,Traffic,Infrastructure}.Tests`
   projelerinde `--ignore-exit-code 8` bulunabilir; `CityRadar.Api.Tests` ve
   `CityRadar.Architecture.Tests` bu istisnayı hiçbir zaman almaz. Bu projelerden birine ilk testi
-  ekleyen feature'ın planı istisnanın kaldırılmasını açık bir madde/kabul kriteri olarak yazar;
-  `ZeroTestExceptionTests` istisna ile kod bir arada durduğu sürece check'i kırar.
+  ekleyen feature'ın planı, açık bir madde/kabul kriteri olarak, o projede **zero-test istisnasını
+  kaldırır ve `--minimum-expected-tests 1`'i etkinleştirir**. `ZeroTestExceptionTests` istisna ile kod
+  bir arada durduğu sürece, `MinimumExpectedTestsTests` ise istisnası olmayan bir projede aktif
+  minimum-test ayarı yoksa check'i kırar.
 - **Threat model (spec 0001):** zero-test guard **kazara drift**'e karşıdır — bir geliştiricinin
   hatayı çözmeye çalışırken ekleyebileceği normal configuration (ör. `--ignore-exit-code 8;9`).
   Guard'ın veya configuration'ın bilinçli olarak değiştirilmesini tooling tek başına engellemez;
