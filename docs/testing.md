@@ -37,6 +37,11 @@ zorunda değil; amaç hangi kriterin hangi testle doğrulandığının görüleb
   `CityRadar.Architecture.Tests` bu istisnayı hiçbir zaman almaz. Bu projelerden birine ilk testi
   ekleyen feature'ın planı istisnanın kaldırılmasını açık bir madde/kabul kriteri olarak yazar;
   `ZeroTestExceptionTests` istisna ile kod bir arada durduğu sürece check'i kırar.
+- **Threat model (spec 0001):** zero-test guard **kazara drift**'e karşıdır — bir geliştiricinin
+  hatayı çözmeye çalışırken ekleyebileceği normal configuration (ör. `--ignore-exit-code 8;9`).
+  Guard'ın veya configuration'ın bilinçli olarak değiştirilmesini tooling tek başına engellemez;
+  kasıtlı bypass independent review, protected tests ve review/CI sürecinde yakalanır. Yeni bulgular
+  bu modele göre triage edilir.
 - **Birincil güvence (plan 0001 amendment 2):** istisnası olmayan her test projesi
   `--minimum-expected-tests 1` ile çalışır; sıfır test exit 8/9 üretir ve dışarıdan enjekte edilen
   bir "exit code 8'i yok say" ayarı bunu yeşile çeviremez. `scripts/check` testleri kontrollü

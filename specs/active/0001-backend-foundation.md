@@ -41,6 +41,14 @@ yapılmayan: hiçbir iş davranışı, endpoint, sağlayıcı entegrasyonu, doma
   "henüz kurulmadı" olarak işaretlenir.
 
 ## Constraints & out of scope
+- **Zero-test guard threat model** (R-06 re-spec, 2026-10-03, Uğur Okan Çivgin): zero-test guard'ın
+  amacı **kazara drift**'i önlemektir — makul bir geliştiricinin bir hatayı çözmeye çalışırken
+  yapabileceği normal configuration değişiklikleri (ör. MTP yardım metnindeki `--ignore-exit-code 8;9`
+  önerisini eklemek). Guard'ın veya ilgili configuration'ın bilinçli/kasıtlı olarak değiştirilmesini
+  tooling'in tek başına imkânsız kılması beklenmez; kasıtlı bypass girişimleri (karışık harfli env,
+  obfuscation, property dolaylaması, guard'ı devre dışı bırakma) independent review, protected tests
+  ve normal review/CI süreci tarafından yakalanır. Yeni bir kasıtlı bypass yüzeyi bulunması tek
+  başına yeni tooling katmanı gerekçesi değildir.
 - Architecture test kütüphanesi: ArchUnitNET **veya** NetArchTest'ten yalnızca biri; seçim plan
   içinde kısa karşılaştırma ve gerekçeyle yapılır (OD-3 kriterleri: FD-1–FD-4'ü sade ifade,
   .NET 10 uyumluluğu, bakım durumu, minimum ek karmaşıklık).
