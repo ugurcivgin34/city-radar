@@ -1,7 +1,8 @@
 #!/bin/sh
 # City Radar security check — dependency vulnerability scanning (docs/security.md).
 # Separate from scripts/check on purpose: a vulnerability-database/registry outage must not look
-# like a test failure. CI runs both. Each part SKIPs visibly until its project exists.
+# like a test failure. CI runs both. The NuGet part never SKIPs (spec 0001); the npm part SKIPs
+# visibly until the mobile project exists.
 # Exceptions are never silent ignores: they need a reasoned, ideally time-boxed decision/ADR.
 set -u
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
