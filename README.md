@@ -36,7 +36,7 @@ cd city-radar
 
 # Backend komutları backend/ içinde çalışır; böylece backend/global.json SDK'yı seçer.
 cd backend
-dotnet --version                      # 10.0.4xx (veya aynı hattta daha yeni)
+dotnet --version                      # 10.0.4xx (veya aynı hatta daha yeni)
 dotnet restore CityRadar.slnx
 dotnet build CityRadar.slnx
 dotnet run --project src/CityRadar.Api   # API host'u; henüz endpoint yok (her yol 404)
