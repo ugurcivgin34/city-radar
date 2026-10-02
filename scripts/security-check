@@ -8,6 +8,8 @@ set -u
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 cd "$ROOT" || exit 1
 failed=0
+# No .NET CLI / test-platform telemetry (docs/security.md, minimum data; review F-6).
+export DOTNET_CLI_TELEMETRY_OPTOUT=1 TESTINGPLATFORM_TELEMETRY_OPTOUT=1
 
 echo "==> nuget-vulnerabilities"
 # Fail-closed, three outcomes (spec 0001 AC-13): no vulnerabilities -> GREEN; vulnerabilities ->

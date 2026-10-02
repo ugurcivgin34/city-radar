@@ -58,6 +58,11 @@
 - **Release requirement (açık):** store yayını öncesi gizlilik politikası, gerekli KVKK
   bilgilendirmeleri ve app store privacy declarations hazırlanır.
 
+## Telemetri
+- .NET CLI ve test platformu telemetrisi kapalıdır: `DOTNET_CLI_TELEMETRY_OPTOUT=1`,
+  `TESTINGPLATFORM_TELEMETRY_OPTOUT=1` — `scripts/check`, `scripts/security-check` ve CI aynı
+  ayarı kullanır (minimum data; review F-6, 2026-10-02).
+
 ## Dependencies
 - Yeni runtime dependency plan içinde açıkça yazılır — paket, neden gerekli, değerlendirilen
   alternatifler, lisans — ve plan onayıyla birlikte onaylanır. Anlamlı dev/test dependency'leri

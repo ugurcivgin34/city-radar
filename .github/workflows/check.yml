@@ -7,6 +7,11 @@ on:
 # Local and CI run the same commands. .NET comes from backend/global.json (spec 0001); the Node
 # step activates once mobile/.nvmrc exists.
 
+# Same telemetry opt-out as scripts/check and scripts/security-check (docs/security.md).
+env:
+  DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+  TESTINGPLATFORM_TELEMETRY_OPTOUT: "1"
+
 jobs:
   doctor:
     runs-on: ubuntu-latest
