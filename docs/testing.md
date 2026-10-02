@@ -36,7 +36,11 @@ zorunda değil; amaç hangi kriterin hangi testle doğrulandığının görüleb
   projelerinde `--ignore-exit-code 8` bulunabilir; `CityRadar.Api.Tests` ve
   `CityRadar.Architecture.Tests` bu istisnayı hiçbir zaman almaz. Bu projelerden birine ilk testi
   ekleyen feature'ın planı istisnanın kaldırılmasını açık bir madde/kabul kriteri olarak yazar;
-  `ZeroTestExceptionTests` istisna ile kod bir arada durduğu sürece check'i kırar.
+  `ZeroTestExceptionTests` istisna ile kod bir arada durduğu sürece check'i kırar. İstisna genel
+  olarak — environment variable (`TESTINGPLATFORM_EXITCODE_IGNORE`), paylaşılan bir script
+  (`scripts/`), CI configuration (`.github/workflows/`) veya `Directory.Build.*` üzerinden —
+  verilemez; `ZeroTestExceptionTests` repo configuration yüzeylerini tarar ve bunu da kırar
+  (`.vs/`, `TestResults/`, `bin/`, `obj/`, `*.user` gibi yerel dosyalar sonucu etkilemez).
 
 **Mobil**
 - `jest-expo` + React Native Testing Library.
