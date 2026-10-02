@@ -26,9 +26,17 @@ zorunda değil; amaç hangi kriterin hangi testle doğrulandığının görüleb
 - **Provider adapter testleri:** gerçek sağlayıcı araştırıldıktan sonra (OD-1) kayıtlı JSON
   fixture'larıyla. Fixture'lar gerçek formatı temsil eder, network gerektirmez, küçük/minimal
   tutulur ve hangi provider/şema örneğinden üretildiği anlaşılır.
-- **Zaman:** `TimeProvider` + testlerde fake zaman (`FakeTimeProvider`). Doğrudan clock
-  kullanımı analyzer/architecture check ile yakalanır; bu aşırı karmaşıksa `scripts/check`
-  içinde güvenilir bir statik kontrol kullanılır.
+- **Zaman:** `TimeProvider` + testlerde fake zaman (`FakeTimeProvider`). Üretim kodunda
+  `DateTime.Now/UtcNow/Today` ve `DateTimeOffset.Now/UtcNow` derleyici hatasıdır
+  (`BannedApiAnalyzers`, `backend/BannedSymbols.txt`); test projeleri muaftır.
+- **Runner:** Microsoft.Testing.Platform (`backend/global.json`); komut
+  `cd backend && dotnet test --solution CityRadar.slnx`. Sıfır test çalıştıran proje hata verir
+  (exit code 8).
+- **Zero-test istisnası:** yalnızca bilerek boş bırakılan `CityRadar.{Shared,Parking,Traffic,Infrastructure}.Tests`
+  projelerinde `--ignore-exit-code 8` bulunabilir; `CityRadar.Api.Tests` ve
+  `CityRadar.Architecture.Tests` bu istisnayı hiçbir zaman almaz. Bu projelerden birine ilk testi
+  ekleyen feature'ın planı istisnanın kaldırılmasını açık bir madde/kabul kriteri olarak yazar;
+  `ZeroTestExceptionTests` istisna ile kod bir arada durduğu sürece check'i kırar.
 
 **Mobil**
 - `jest-expo` + React Native Testing Library.

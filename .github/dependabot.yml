@@ -1,0 +1,20 @@
+# Dependency update PRs (docs/security.md "Dependabot"): never auto-merged — every PR passes the
+# same required checks. Major version bumps need their own plan item and explicit approval.
+# npm (mobile/) is added by the mobile setup feature once its manifest exists.
+version: 2
+updates:
+  - package-ecosystem: nuget
+    directory: /backend
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: deps
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: ci
+    open-pull-requests-limit: 5
