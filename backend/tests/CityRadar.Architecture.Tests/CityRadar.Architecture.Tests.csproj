@@ -1,6 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
+    <!-- Primary zero-test guarantee (plan 0001 amendment 2): zero tests exits 8/9, which an
+         injected "ignore exit code 8" setting cannot turn green. -->
+    <TestingPlatformCommandLineArguments>$(TestingPlatformCommandLineArguments) --minimum-expected-tests 1</TestingPlatformCommandLineArguments>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="TngTech.ArchUnitNET.xUnitV3" />

@@ -52,23 +52,37 @@ public sealed partial class ZeroTestExceptionTests
     public void ZeroTestException_IsNotSetThroughTheEnvironment()
     {
         var offenders = ConfigurationSurfaces()
-            .Where(file => File.ReadAllText(file).Contains(ExitCodeIgnoreVariable, StringComparison.OrdinalIgnoreCase))
+            .Where(file => AssignsExitCodeIgnoreVariable(File.ReadAllText(file)))
             .ToList();
 
-        Assert.True(offenders.Count == 0, ExitCodeIgnoreVariable + " must not be set: " + string.Join(", ", offenders));
+        Assert.True(offenders.Count == 0, "TESTINGPLATFORM_EXITCODE_IGNORE must not be set: " + string.Join(", ", offenders));
     }
 
-    // Built by concatenation so this source file never matches its own scan.
-    private static readonly string ExitCodeIgnoreVariable = "TESTINGPLATFORM_" + "EXITCODE_IGNORE";
+    // Assignments only: unsetting the variable (env -u, scripts/check.conf) is the opposite of a bypass.
+    [Theory]
+    [InlineData("TESTINGPLATFORM_EXITCODE_IGNORE=8")]
+    [InlineData("  TESTINGPLATFORM_EXITCODE_IGNORE: \"8\"")]
+    [InlineData("\"TESTINGPLATFORM_EXITCODE_IGNORE\": \"8\"")]
+    [InlineData("$env:TESTINGPLATFORM_EXITCODE_IGNORE = \"8\"")]
+    public void EnvironmentGuard_RecognizesAssignments(string text) =>
+        Assert.True(AssignsExitCodeIgnoreVariable(text), "not recognized: " + text);
 
-    // Only repository configuration surfaces that can actually carry the exception (review 2,
-    // B-2): IDE state, test results, build output, *.user and stray local files never decide
-    // the check, so the same commit gives the same result locally and in CI.
-    private static readonly string[] BackendConfigurationPatterns = ["*.csproj", "*.props", "*.targets", "global.json", "testconfig.json"];
+    [Fact]
+    public void EnvironmentGuard_IgnoresUnset() =>
+        Assert.False(AssignsExitCodeIgnoreVariable("env -u TESTINGPLATFORM_EXITCODE_IGNORE dotnet test"));
+
+    // Secondary defense only (plan 0001 amendment 2): the primary guarantee is the runtime
+    // minimum-expected-tests invariant (MinimumExpectedTestsTests). Only repository configuration
+    // surfaces are scanned (review 2, B-2): IDE state, test results, build output, *.user and stray
+    // local files never decide the check, so the same commit gives the same result locally and in CI.
+    private static readonly string[] BackendConfigurationPatterns =
+        ["*.csproj", "*.props", "*.targets", "*.rsp", "global.json", "testconfig.json", "launchSettings.json", "*.run.json"];
 
     private static readonly string[] LocalOnlySegments = ["bin", "obj", ".vs", "TestResults", "node_modules"];
 
-    private static bool IgnoresZeroTests(string text) => IgnoreExitCode8().IsMatch(text);
+    internal static bool IgnoresZeroTests(string text) => IgnoreExitCode8().IsMatch(text);
+
+    private static bool AssignsExitCodeIgnoreVariable(string text) => ExitCodeIgnoreAssignment().IsMatch(text);
 
     private static bool HasSourceFiles(string projectDirectory) =>
         Directory.EnumerateFiles(projectDirectory, "*.cs", SearchOption.AllDirectories)
@@ -80,14 +94,15 @@ public sealed partial class ZeroTestExceptionTests
             .SelectMany(pattern => Directory.EnumerateFiles(BackendPaths.Root, pattern, SearchOption.AllDirectories))
             .Where(file => !IsLocalOnly(Path.GetRelativePath(BackendPaths.Root, file)));
 
-        var scripts = Directory.EnumerateFiles(Path.Combine(BackendPaths.Repository, "scripts"), "*", SearchOption.TopDirectoryOnly);
+        var scripts = Directory.EnumerateFiles(Path.Combine(BackendPaths.Repository, "scripts"), "*", SearchOption.AllDirectories);
 
-        var workflowDirectory = Path.Combine(BackendPaths.Repository, ".github", "workflows");
-        var workflows = Directory.Exists(workflowDirectory)
-            ? Directory.EnumerateFiles(workflowDirectory, "*.yml").Concat(Directory.EnumerateFiles(workflowDirectory, "*.yaml"))
+        var githubDirectory = Path.Combine(BackendPaths.Repository, ".github");
+        var github = Directory.Exists(githubDirectory)
+            ? Directory.EnumerateFiles(githubDirectory, "*.yml", SearchOption.AllDirectories)
+                .Concat(Directory.EnumerateFiles(githubDirectory, "*.yaml", SearchOption.AllDirectories))
             : [];
 
-        return backend.Concat(scripts).Concat(workflows).Distinct(StringComparer.OrdinalIgnoreCase);
+        return backend.Concat(scripts).Concat(github).Distinct(StringComparer.OrdinalIgnoreCase);
     }
 
     private static bool IsTestProjectFile(string file) =>
@@ -128,4 +143,8 @@ public sealed partial class ZeroTestExceptionTests
     // Separator: whitespace (incl. newlines), "=" or ":"; list items separated by ";" or ",".
     [GeneratedRegex(@"--ignore-exit-code(?:\s*[=:]\s*|\s+)[""']?(?:\d+\s*[;,]\s*)*8(?!\d)")]
     private static partial Regex IgnoreExitCode8();
+
+    // NAME=…, NAME: …, "NAME": …, $env:NAME = … (shell, MSBuild, YAML, JSON, PowerShell).
+    [GeneratedRegex(@"TESTINGPLATFORM_EXITCODE_IGNORE[""']?\s*[=:]", RegexOptions.IgnoreCase)]
+    private static partial Regex ExitCodeIgnoreAssignment();
 }
