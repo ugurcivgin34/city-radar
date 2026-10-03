@@ -22,8 +22,11 @@ davranış problemi, bir incident ya da repo koşullarının değişmesidir (ADR
   ayarlarının geri okunmasıyla verilir.)*
 - [ ] CB-2 — **Branch hijyeni:** Ship anında remote'ta yalnızca `main` ve açık PR'lara ait
   branch'ler bulunur; merge edilmiş branch kalmaz. `docs/git.md`, merge sonrası branch'in nasıl
-  temizlendiğini (otomatik silme + lokal temizlik) ve elle silmenin ancak içeriğin `main`'de
-  bulunduğu doğrulandıktan sonra yapıldığını yazar.
+  temizlendiğini (otomatik silme + lokal temizlik) ve elle silme için iki ayrı doğrulama yolunu
+  yazar: merge edilmiş PR'da PR `MERGED` ve branch tip'i = PR'ın head SHA'sı; merge edilmeden
+  kapanan PR'da kapanış gerekçesi PR'da kayıtlı ve branch tip'i = PR'ın kayıtlı head SHA'sı. Açık
+  PR'a bağlı branch silinmez. *(Review 1 L-1 / review 2 N-1 ile düzeltildi — insan kararı,
+  2026-10-03.)*
 - [ ] CB-3 — **Review kanıt kayıtları (geçmiş yeniden yazılmaz):**
   - PR #6: kayıt "review pre-merge yapıldı, kayıt post-merge eklendi" olarak yazılır. Bağımsız
     review raporu yorum olarak eklenir; yorum gerçek zaman çizelgesini verir (review başlangıç/bitiş,
