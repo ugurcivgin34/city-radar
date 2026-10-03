@@ -5,7 +5,8 @@ on:
 
 # Required checks for main (docs/git.md): doctor --strict, scripts/check, scripts/security-check.
 # Local and CI run the same commands. .NET comes from backend/global.json (spec 0001); the Node
-# step activates once mobile/.nvmrc exists.
+# step activates once mobile/.nvmrc exists. setup-node stays on v4 until then: its major upgrade
+# (Dependabot #4, v7) is done in the mobile foundation feature, where the step really runs (spec 0002).
 
 # Same telemetry opt-out as scripts/check and scripts/security-check (docs/security.md).
 env:
@@ -16,16 +17,16 @@ jobs:
   doctor:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Workspace health (spec/plan gates are failures in CI)
         run: ./scripts/doctor --strict
 
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Setup .NET (SDK pinned by backend/global.json)
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
           global-json-file: backend/global.json
       - name: Setup Node (version pinned by mobile/.nvmrc)
@@ -41,9 +42,9 @@ jobs:
   security-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Setup .NET (SDK pinned by backend/global.json)
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
           global-json-file: backend/global.json
       - name: Setup Node (version pinned by mobile/.nvmrc)
