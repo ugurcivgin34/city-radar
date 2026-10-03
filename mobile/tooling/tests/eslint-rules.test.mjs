@@ -96,13 +96,25 @@ describe('FD-8: API boundary only through its public surface', () => {
 describe('raw user-visible text', () => {
   const header = "import { Text } from 'react-native';\n";
 
-  test('reports literal text in JSX', async () => {
-    const code = `${header}export const A = () => <Text>Merhaba</Text>;`;
-    assert.ok((await hits(code, 'src/screens/Example.tsx', 'User-visible text')).length > 0);
-  });
+  for (const child of [
+    'Merhaba',
+    "{'İstanbul\\'da otopark'}",
+    '{"İstanbul\'da otopark"}',
+    "{`İstanbul'da ${1} otopark`}",
+  ]) {
+    test(`reports raw text as a JSX child: ${child}`, async () => {
+      for (const wrapper of [`<Text>${child}</Text>`, `<>${child}</>`]) {
+        const code = `${header}export const A = () => ${wrapper};`;
+        assert.ok(
+          (await hits(code, 'src/screens/Example.tsx', 'User-visible text')).length > 0,
+          wrapper,
+        );
+      }
+    });
+  }
 
-  test('allows text from tr.ts', async () => {
-    const code = `${header}import { tr } from '../localization/tr';\nexport const A = () => <Text>{tr.start.title}</Text>;`;
+  test('allows text from tr.ts and string props', async () => {
+    const code = `${header}import { tr } from '../localization/tr';\nexport const A = () => <Text accessibilityRole={'header'} style={{ color: 'red' }}>{tr.start.title}{\`\${tr.start.description}\`}</Text>;`;
     assert.equal((await hits(code, 'src/screens/Example.tsx', 'User-visible text')).length, 0);
   });
 });

@@ -13,8 +13,8 @@
   **Türkçe** (`docs/git.md`).
 - Kullanıcıya gösterilen metinler **Türkçe**; dağınık string literal değil, merkezi kaynak:
   `mobile/src/localization/tr.ts`. v1'de i18n kütüphanesi yok; büyürse feature bazlı bölünebilir.
-  JSX içindeki ham metin ESLint ile yasaktır; prop'lardaki string'ler (ör. `accessibilityLabel`)
-  review'da kontrol edilir.
+  JSX çocuğu olarak yazılan ham metin — düz metin, `{'…'}` ve `{`…`}` — ESLint ile yasaktır;
+  prop'lardaki string'ler (ör. `accessibilityLabel`) review'da kontrol edilir.
 
 ## Language & framework versions
 - **Backend:** .NET 10 LTS (SDK `global.json` ile pinlenir), `Nullable=enable`,

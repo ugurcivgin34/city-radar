@@ -33,7 +33,18 @@ const restrictedSyntax = [
       'ImportExpression[source.value=/^(\\.{1,2}\\/)+(.*\\/)?api\\/.+/]:not([source.value=/\\/api\\/index$/])',
     message: FD8,
   },
+  // Raw text as a JSX child: plain text, {'…'} and {`…`} (Turkish apostrophes push authors to the
+  // quoted forms, which react/no-unescaped-entities does not flag). Props are checked in review.
   { selector: 'JSXText[value=/\\S/]', message: RAW_TEXT },
+  {
+    selector: ':matches(JSXElement, JSXFragment) > JSXExpressionContainer > Literal[value=/\\S/]',
+    message: RAW_TEXT,
+  },
+  {
+    selector:
+      ':matches(JSXElement, JSXFragment) > JSXExpressionContainer > TemplateLiteral > TemplateElement[value.raw=/\\S/]',
+    message: RAW_TEXT,
+  },
 ];
 
 // FD-5: transport globals, also when reached through a global object.
