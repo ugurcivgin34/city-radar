@@ -14,7 +14,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "jest --ci",
-    "test:tooling": "node --test tooling/tests/",
+    "test:tooling": "node --test \"tooling/tests/*.test.mjs\"",
     "check:forbidden": "node tooling/forbidden.mjs",
     "export:android": "expo export --platform android --output-dir dist"
   },
