@@ -13,14 +13,17 @@
   **Türkçe** (`docs/git.md`).
 - Kullanıcıya gösterilen metinler **Türkçe**; dağınık string literal değil, merkezi kaynak:
   `mobile/src/localization/tr.ts`. v1'de i18n kütüphanesi yok; büyürse feature bazlı bölünebilir.
+  JSX içindeki ham metin ESLint ile yasaktır; prop'lardaki string'ler (ör. `accessibilityLabel`)
+  review'da kontrol edilir.
 
 ## Language & framework versions
 - **Backend:** .NET 10 LTS (SDK `global.json` ile pinlenir), `Nullable=enable`,
   `TreatWarningsAsErrors=true`, .NET analyzers açık (ortak `Directory.Build.props`).
 - **Mobil:** React Native + Expo, TypeScript `strict: true`, Expo Router, TanStack Query,
   MapLibre React Native.
-- **Node:** Expo SDK ile uyumlu **kesin Node major sürümü** ilk mobil setup feature'ında repoda
-  pinlenir (ör. `.nvmrc` + `package.json` `engines`). Expo SDK da o feature'da kesin sürümle sabitlenir.
+- **Node:** 22.23.3 (`mobile/.nvmrc`; `engines` `>=22.13.0 <23`, `mobile/.npmrc` `engine-strict`).
+  **Expo SDK 57** (`expo` 57.0.26, kesin); Expo'ya bağlı paketler `npx expo install` ile SDK'nın
+  beklediği sürümlerde tutulur (spec 0003).
 - Dependency ve runtime **major** upgrade'leri plansız yapılmaz (ayrı plan maddesi + açık onay).
 
 ## Naming
@@ -75,10 +78,10 @@
   Microsoft.Testing.Platform — pinler): restore · build (`TreatWarningsAsErrors`, nullable,
   analyzers, saat kuralı = `BannedApiAnalyzers` RS0030) · `dotnet format --verify-no-changes` ·
   test (architecture testleri dahil). Paket sürümleri yalnızca `backend/Directory.Packages.props`'ta (CPM).
-- **Mobil:** lockfile doğrulamalı install (`npm ci`) · `tsc --noEmit` · ESLint (FD-5, FD-6, FD-8
-  dahil) · Prettier check · testler (oluşturulduğunda).
+- **Mobil** (`mobile/` içinde çalışır; Node `mobile/.nvmrc`): lockfile doğrulamalı install
+  (`npm ci`) · `tsc --noEmit` · ESLint (FD-5, FD-6, FD-8 dahil) · Prettier check · FD-6/FD-7
+  taraması (`tooling/forbidden.mjs`) · Jest · tooling testleri (`node:test`) · Android export.
 - **Güvenlik:** dependency vulnerability taraması ayrı giriş noktasında — `scripts/security-check`
   (`docs/security.md`); CI ikisini de çalıştırır.
-- Backend adımları hiçbir zaman `SKIP` etmez. Mobil adımların araçları (ESLint kuralları, FD-7
-  deny-list) mobil setup feature'ında oluşturulur; o zamana kadar `check.conf` onları görünür
-  şekilde `SKIP` eder.
+- Backend ve mobil adımları hiçbir zaman `SKIP` etmez (spec 0001, spec 0003); `mobile/package.json`
+  yoksa mobil adımlar hata verir.
