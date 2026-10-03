@@ -136,4 +136,4 @@ historical analytics, web client, background location, E2E test altyapısı.
 - **Release requirement (v1'i bloklamaz, store yayınını bloklar):** gizlilik politikası, KVKK
   bilgilendirmeleri, app store privacy declarations (`docs/security.md`).
 - **Remote / branch protection:** remote kuruldu; `main` branch protection GitHub planı nedeniyle
-  zorlanmıyor, süreçle telafi ediliyor (`docs/git.md`, ADR 0006).
+  kullanılamıyor; squash-only repo ayarıyla, kalan kurallar süreçle (`docs/git.md`, ADR 0007).
