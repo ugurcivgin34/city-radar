@@ -4,14 +4,15 @@ on:
   pull_request:
 
 # Required checks for main (docs/git.md): doctor --strict, scripts/check, scripts/security-check.
-# Local and CI run the same commands. .NET comes from backend/global.json (spec 0001); the Node
-# step activates once mobile/.nvmrc exists. setup-node stays on v4 until then: its major upgrade
-# (Dependabot #4, v7) is done in the mobile foundation feature, where the step really runs (spec 0002).
+# Local and CI run the same commands. .NET comes from backend/global.json (spec 0001); Node comes
+# from mobile/.nvmrc (spec 0003). setup-node v7 was taken over from Dependabot #4 by spec 0003 once
+# the Node step really runs (plan 0003, D-1).
 
 # Same telemetry opt-out as scripts/check and scripts/security-check (docs/security.md).
 env:
   DOTNET_CLI_TELEMETRY_OPTOUT: "1"
   TESTINGPLATFORM_TELEMETRY_OPTOUT: "1"
+  EXPO_NO_TELEMETRY: "1"
 
 jobs:
   doctor:
@@ -30,8 +31,7 @@ jobs:
         with:
           global-json-file: backend/global.json
       - name: Setup Node (version pinned by mobile/.nvmrc)
-        if: hashFiles('mobile/.nvmrc') != ''
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version-file: mobile/.nvmrc
           cache: npm
@@ -48,8 +48,7 @@ jobs:
         with:
           global-json-file: backend/global.json
       - name: Setup Node (version pinned by mobile/.nvmrc)
-        if: hashFiles('mobile/.nvmrc') != ''
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version-file: mobile/.nvmrc
       - name: Dependency vulnerability scan

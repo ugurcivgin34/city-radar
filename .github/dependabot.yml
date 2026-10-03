@@ -1,6 +1,7 @@
 # Dependency update PRs (docs/security.md "Dependabot"): never auto-merged — every PR passes the
 # same required checks. Major version bumps need their own plan item and explicit approval.
-# npm (mobile/) is added by the mobile setup feature once its manifest exists.
+# npm (mobile/, spec 0003): packages that Expo moves together with the SDK only get patch updates;
+# their minor/major versions change through an Expo SDK upgrade plan (`npx expo install --fix`).
 version: 2
 updates:
   - package-ecosystem: nuget
@@ -18,3 +19,32 @@ updates:
     commit-message:
       prefix: ci
     open-pull-requests-limit: 5
+
+  - package-ecosystem: npm
+    directory: /mobile
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: deps
+    open-pull-requests-limit: 5
+    ignore:
+      - dependency-name: "expo"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "expo-*"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "@expo/*"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "jest-expo"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "eslint-config-expo"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "react-test-renderer"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "react-native"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "react-native-*"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
