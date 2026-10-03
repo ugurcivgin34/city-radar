@@ -60,9 +60,12 @@ davranış problemi, bir incident ya da repo koşullarının değişmesidir (ADR
   - `main` üzerindeki CI `actions/checkout@v7` ve `actions/setup-dotnet@v6` kullanır.
   - Her iki yükseltme için release notes değerlendirmesi, açık insan onayı ve current-head CI
     doğrulaması (CB-6) tamamlanmış ve kayıtlıdır.
-  - Dependabot #2 ve #3 açık kalmaz. Merge mi yoksa supersede mi edilecekleri PLAN kararıdır;
-    kriter yalnızca final state'i bağlar.
-  - Bu kriter spec `Shipped` olmadan önce tamamlanır ve VERIFY'da doğrulanır.
+  - Yukarıdaki iki madde (v7/v6, release notes, açık onay, current-head CI) spec `Shipped` olmadan
+    önce tamamlanır ve VERIFY'da doğrulanır.
+  - Dependabot #2 ve #3, PR #7 merge olana kadar açık kalır (insan kararı, plan R-4). Kapanışları
+    merge sonrası **ship-time housekeeping**'dir: otomatik kapandılarsa bu, kapanmadılarsa
+    "superseded" yorumuyla kapatılmaları PR #7'ye yorumla kanıt olarak kaydedilir. Bu kısım VERIFY
+    kriteri değildir. *(Review 1 M-2 ile düzeltildi — insan kararı, 2026-10-03.)*
 - [ ] CB-8 — **setup-node devri:** Dependabot #4 merge edilmeden kapatılır. Gerekçe PR'da yazılır:
   Node adımı `mobile/.nvmrc` olmadan çalışmıyor; doğrulanmamış bir yükseltme alınmıyor.
   `actions/setup-node` major yükseltmesinin Mobile Foundation'a devredildiği repoda kalıcı bir yerde
