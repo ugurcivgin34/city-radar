@@ -91,6 +91,9 @@ branch protection'ı açma adımı plan kısıtı nedeniyle yapılamadı; yukar�
 ## Branch cleanup
 - Merge edilen PR'ın remote branch'ini GitHub otomatik siler (repo ayarı). Lokalde:
   `git switch main && git pull --ff-only && git fetch --prune`, ardından lokal branch silinir.
-- Remote branch'i elle silmek yalnızca içeriğinin `main`'de bulunduğu doğrulandıktan sonra yapılır
-  (squash-merge'de: branch tip'i PR'ın head'i ve tree'si squash commit'iyle aynı). Açık PR'a bağlı
-  branch silinmez.
+- Merge edilmiş PR'ın remote branch'ini elle silmek, PR `MERGED` durumdayken ve branch tip'i PR'ın
+  merge edilen head SHA'sıyla aynıyken yapılır (`gh pr view <n> --json state,headRefOid`); böylece
+  merge'den sonra branch'e eklenmiş bir commit kaybolmaz.
+- Merge edilmeden kapanan PR'ın (superseded, devredilmiş, reddedilmiş) branch'i, PR'da kapanış
+  gerekçesi kayıtlıyken silinebilir; içerik PR üzerinden GitHub'da erişilebilir kalır.
+- Açık PR'a bağlı branch silinmez.
