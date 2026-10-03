@@ -11,7 +11,7 @@
     {
       "id": "GHSA-86w9-cpqp-85rv",
       "package": "node-forge",
-      "reason": "No patched version; reached only via @expo/cli -> @expo/code-signing-certificates (build tooling; expo-updates code signing is not used).",
+      "reason": "No patched version; reached only via @expo/cli (direct dependency and @expo/code-signing-certificates): dev-server manifest signing and expo run:ios code signing, not in the app bundle. expo-updates code signing, EAS and development code signing are not used.",
       "adr": "docs/decisions/0009-npm-audit-exception-expo-cli.md",
       "expires": "2026-12-31"
     }

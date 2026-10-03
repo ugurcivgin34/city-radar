@@ -11,12 +11,15 @@ high/critical zafiyette RED olmalı. Mobil temel kurulumunda Expo SDK'nın en g�
 | Advisory | Paket | Etkilenen | Yamalı sürüm | Yol |
 |---|---|---|---|---|
 | GHSA-vfj7-8cjw-p6xm — stack-exhaustion DoS | `braces` | ≤ 3.0.3 | Yok (en son sürüm 3.0.3) | `expo` → `@expo/cli` → `@expo/metro-file-map` → `micromatch` → `braces` |
-| GHSA-86w9-cpqp-85rv — RSA PKCS#1 v1.5 imza doğrulama | `node-forge` | ≤ 1.4.0 | Yok (en son sürüm 1.4.0) | `expo` → `@expo/cli` → `@expo/code-signing-certificates` → `node-forge` |
+| GHSA-86w9-cpqp-85rv — RSA PKCS#1 v1.5 imza doğrulama | `node-forge` | ≤ 1.4.0 | Yok (en son sürüm 1.4.0) | `expo` → `@expo/cli` (doğrudan bağımlılık) ve `@expo/cli` → `@expo/code-signing-certificates` → `node-forge` |
 
 npm bunları production sayar, çünkü `expo` paketi `@expo/cli`'ye doğrudan bağımlıdır. Her iki yol da
-geliştirici makinesinde ve CI'da çalışan build/CLI araçlarıdır: Metro dosya eşleme ve
-`expo-updates` kod imzalama sertifikaları. Üretilen uygulama paketinde (`expo export` çıktısı ve
-metadata'sı) bu paketlere referans yoktur. npm'in önerdiği "düzeltme" (`expo` 44'e inmek) geçerli
+geliştirici makinesinde ve CI'da çalışan build/CLI araçlarıdır. `braces` Metro dosya eşlemesinde
+kullanılır. `node-forge`'u `@expo/cli` iki yerde kullanır: `expo run:ios` kod imzalama
+(`run/ios/codeSigning`) ve geliştirme sunucusunun manifest imzalaması — `expo start`, istemci
+`expo-expect-signature` başlığı gönderdiğinde manifest'i imzalar (`utils/codesigning`,
+`ExpoGoManifestHandlerMiddleware`). Üretilen uygulama paketinde (`expo export` çıktısı ve
+metadata'sı) bu paketlere referans yoktur (spec 0003 review'ında `.hbc` içinde 0 eşleşme). npm'in önerdiği "düzeltme" (`expo` 44'e inmek) geçerli
 değildir. Yamalı sürüm olmadığı için bugün bağımlılık değişikliğiyle kapatılamaz.
 
 ## Decision
@@ -31,8 +34,10 @@ Bu iki advisory, **yalnızca GHSA kimlikleri ve paket adlarıyla** ve **2026-12-
 - `security-check` bugün yeşil olur; aynı paketlerde **yeni** bir advisory ya da başka herhangi bir
   high/critical zafiyet yine RED verir.
 - Maliyet: bilinen iki zafiyet geliştirici/CI araçlarında süre sonuna kadar kabul edilmiş olur.
-  `braces` DoS'u build sırasında kötü niyetli glob deseni gerektirir; `node-forge` imza açığı
-  kod imzalama (`expo-updates`) kullanılmadıkça devreye girmez — bu proje kullanmıyor.
+  `braces` DoS'u build sırasında kötü niyetli glob deseni gerektirir. `node-forge` açığı imza
+  *doğrulama*yla ilgilidir; CLI'ın kullandığı yollar geliştirme sırasında imza *üretir* (manifest,
+  iOS kod imzalama). Bu proje `expo-updates` kod imzalaması, EAS ya da development code signing
+  kullanmıyor; uygulama paketinde node-forge yok.
 - İstisnanın kaldırılması bir sonraki Expo SDK yükseltmesinin ya da yamalı sürümün işidir.
 
 ## Alternatives considered
@@ -43,5 +48,6 @@ Bu iki advisory, **yalnızca GHSA kimlikleri ve paket adlarıyla** ve **2026-12-
 ## Revisit triggers
 - 2026-12-31 son tarihi (istisna otomatik olarak RED'e döner).
 - `braces` veya `node-forge` için yamalı sürüm yayımlanması ya da Expo SDK yükseltmesi.
-- Projede `expo-updates` kod imzalamanın kullanılmaya başlanması (node-forge açığı o zaman runtime
-  riskine dönüşür; istisna derhal yeniden değerlendirilir).
+- Projede `expo-updates` kod imzalamanın, EAS projectId'nin ya da development code signing'in
+  devreye girmesi (node-forge açığı o zaman imza doğrulama akışına girebilir; istisna derhal
+  yeniden değerlendirilir).
