@@ -24,4 +24,4 @@ through files (spec `Status`, plan `Approved by / on`), never chat.
 | 7 | **TRIAGE** | Human | — | **[GATE: human]** Each finding: real (fix) / noise (reject, write why) / investigate (→ QA, R-05). | human · triage recorded in the review/PR thread |
 | 8 | **FIX ROUNDS** | Developer | `prompts/build.md` §fixes | Only real findings. Re-review the fix diff (step 6, narrow scope). Rounds > 3 → R-06. | Developer applies triage; REVIEW again on the fix diff |
 | 9 | **VERIFY** | QA | `prompts/verify.md` | Criterion ↔ evidence table complete. UI criteria: screenshot = evidence. | VERIFY · STOP with evidence table → "Next: SHIP" |
-| 10 | **SHIP** | Human | — | **[GATE: human]** DoD checklist in spec all green → PR (template) → merge → move spec to `specs/done/` → fill scorecard. | human · spec moved to `specs/done/`, `Status: Shipped` |
+| 10 | **SHIP** | Human | — | **[GATE: human]** DoD checklist in spec all green → PR (template) → current-head CI check (three checks green on the PR's head SHA, `docs/git.md`) → merge pinned to that SHA → move spec to `specs/done/` → fill scorecard. | human · spec moved to `specs/done/`, `Status: Shipped` |
