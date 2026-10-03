@@ -86,4 +86,26 @@ describe('CLI', () => {
       rmSync(dir, { recursive: true, force: true });
     }
   });
+
+  test('scans .env.example for provider hosts', () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), 'forbidden-'));
+    try {
+      writeFileSync(path.join(dir, 'package.json'), JSON.stringify({ dependencies: {} }));
+      writeFileSync(
+        path.join(dir, '.env.example'),
+        'EXPO_PUBLIC_API_BASE_URL=http://localhost:5000\n',
+      );
+      assert.equal(run(dir).status, 0);
+
+      writeFileSync(
+        path.join(dir, '.env.example'),
+        'EXPO_PUBLIC_API_BASE_URL=https://api.ibb.gov.tr\n',
+      );
+      const result = run(dir);
+      assert.equal(result.status, 1);
+      assert.match(result.stderr, /FD-6: provider host "ibb\.gov\.tr" in \.env\.example:1/);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
 });

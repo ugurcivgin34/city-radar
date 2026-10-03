@@ -20,7 +20,8 @@ export const FORBIDDEN_PACKAGES = [
 ];
 
 const SOURCE_DIRS = ['app', 'src'];
-const SOURCE_FILES = ['app.json'];
+// .env.example: the API base URL is configuration, so a provider host must not appear there either.
+const SOURCE_FILES = ['app.json', '.env.example'];
 const SOURCE_EXTENSIONS = new Set(['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs', '.json']);
 const hostPattern = new RegExp(providerHosts.PROVIDER_HOST_SOURCE, 'i');
 
