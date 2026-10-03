@@ -10,18 +10,25 @@ describe('parseApiBaseUrl', () => {
     expect(parseApiBaseUrl(raw)).toBe(expected);
   });
 
-  it.each([undefined, '', '   '])('rejects a missing value (%p) with a configuration error', (raw) => {
-    expect(() => parseApiBaseUrl(raw)).toThrow(ApiConfigError);
-    expect(() => parseApiBaseUrl(raw)).toThrow(/EXPO_PUBLIC_API_BASE_URL is not set/);
-  });
-
-  it.each(['ftp://api.example.com', 'api.example.com', 'https://', 'https://api.example.com/?a=1', 'https://api.example.com/#x', 'https://exa mple.com'])(
-    'rejects %p as not an absolute http(s) URL',
+  it.each([undefined, '', '   '])(
+    'rejects a missing value (%p) with a configuration error',
     (raw) => {
       expect(() => parseApiBaseUrl(raw)).toThrow(ApiConfigError);
-      expect(() => parseApiBaseUrl(raw)).toThrow(/must be an absolute http\(s\) URL/);
+      expect(() => parseApiBaseUrl(raw)).toThrow(/EXPO_PUBLIC_API_BASE_URL is not set/);
     },
   );
+
+  it.each([
+    'ftp://api.example.com',
+    'api.example.com',
+    'https://',
+    'https://api.example.com/?a=1',
+    'https://api.example.com/#x',
+    'https://exa mple.com',
+  ])('rejects %p as not an absolute http(s) URL', (raw) => {
+    expect(() => parseApiBaseUrl(raw)).toThrow(ApiConfigError);
+    expect(() => parseApiBaseUrl(raw)).toThrow(/must be an absolute http\(s\) URL/);
+  });
 });
 
 describe('getApiBaseUrl', () => {
