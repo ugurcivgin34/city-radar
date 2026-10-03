@@ -29,6 +29,8 @@ const restrictedSyntax = [
 const httpClients = [
   'axios',
   'cross-fetch',
+  // Expo SDK's own fetch implementation (streaming); available without adding a dependency.
+  'expo/fetch',
   'got',
   'isomorphic-fetch',
   'ky',

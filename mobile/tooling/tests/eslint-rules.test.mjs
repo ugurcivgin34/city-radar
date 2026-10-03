@@ -32,6 +32,7 @@ describe('FD-5: HTTP only inside src/api', () => {
     "export const load = () => globalThis.fetch('https://example.com');",
     'export const open = () => new XMLHttpRequest();',
     "import axios from 'axios';\nexport const load = () => axios.get('/x');",
+    "import { fetch } from 'expo/fetch';\nexport const load = () => fetch('https://example.com');",
   ];
 
   for (const code of cases) {
