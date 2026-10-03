@@ -30,7 +30,11 @@ describe('FD-5: HTTP only inside src/api', () => {
   const cases = [
     "export const load = () => fetch('https://example.com');",
     "export const load = () => globalThis.fetch('https://example.com');",
+    "export const load = () => global.fetch('https://example.com');",
+    "export const load = () => self.fetch('https://example.com');",
     'export const open = () => new XMLHttpRequest();',
+    'export const open = () => new window.XMLHttpRequest();',
+    "export const open = () => new global.WebSocket('wss://example.com');",
     "import axios from 'axios';\nexport const load = () => axios.get('/x');",
     "import { fetch } from 'expo/fetch';\nexport const load = () => fetch('https://example.com');",
   ];
@@ -72,9 +76,18 @@ describe('FD-8: API boundary only through its public surface', () => {
     }
   });
 
+  test('reports dynamic imports of internal api files outside src/api', async () => {
+    const code = "export const load = () => import('../api/config');";
+    assert.ok((await hits(code, 'src/screens/Example.ts', 'FD-8')).length > 0);
+  });
+
   test('allows the public surface and internal imports inside src/api', async () => {
-    const outside = "import { getApiBaseUrl } from '../api';\nexport const y = getApiBaseUrl;";
-    assert.equal((await hits(outside, 'src/screens/Example.ts', 'FD-8')).length, 0);
+    for (const specifier of ['../api', '../api/index']) {
+      const code = `import { getApiBaseUrl } from '${specifier}';\nexport const y = getApiBaseUrl;`;
+      assert.equal((await hits(code, 'src/screens/Example.ts', 'FD-8')).length, 0, specifier);
+    }
+    const dynamic = "export const load = () => import('../api');";
+    assert.equal((await hits(dynamic, 'src/screens/Example.ts', 'FD-8')).length, 0);
     const inside = "import { parseApiBaseUrl } from './config';\nexport const y = parseApiBaseUrl;";
     assert.equal((await hits(inside, 'src/api/other.ts', 'FD-8')).length, 0);
   });

@@ -18,13 +18,27 @@ const FD8 =
 const RAW_TEXT =
   'User-visible text comes from src/localization/tr.ts, not from literals in JSX (docs/conventions.md).';
 
-// FD-6 and the raw-text rule share no-restricted-syntax, so they are always configured together.
+// FD-8 import specifiers: anything below an api/ directory ('../api/config', a future
+// '../../api/generated/types'), except the public surface itself ('../api', '../api/index').
+const apiInternal = '^(\\.{1,2}/)+(.*/)?api/(?!index$).+';
+
+// FD-6, FD-8 (dynamic import) and the raw-text rule share no-restricted-syntax, so they are always
+// configured together.
 const restrictedSyntax = [
   'error',
   { selector: `Literal[value=${providerHost}]`, message: FD6 },
   { selector: `TemplateElement[value.raw=${providerHost}]`, message: FD6 },
+  {
+    selector:
+      'ImportExpression[source.value=/^(\\.{1,2}\\/)+(.*\\/)?api\\/.+/]:not([source.value=/\\/api\\/index$/])',
+    message: FD8,
+  },
   { selector: 'JSXText[value=/\\S/]', message: RAW_TEXT },
 ];
+
+// FD-5: transport globals, also when reached through a global object.
+const transportGlobals = ['fetch', 'XMLHttpRequest', 'WebSocket', 'EventSource'];
+const globalObjects = ['globalThis', 'global', 'self', 'window'];
 
 const httpClients = [
   'axios',
@@ -54,25 +68,21 @@ module.exports = defineConfig([
       // FD-5: transport globals outside src/api.
       'no-restricted-globals': [
         'error',
-        { name: 'fetch', message: FD5 },
-        { name: 'XMLHttpRequest', message: FD5 },
-        { name: 'WebSocket', message: FD5 },
-        { name: 'EventSource', message: FD5 },
+        ...transportGlobals.map((name) => ({ name, message: FD5 })),
       ],
       'no-restricted-properties': [
         'error',
-        { object: 'globalThis', property: 'fetch', message: FD5 },
-        { object: 'globalThis', property: 'XMLHttpRequest', message: FD5 },
-        { object: 'window', property: 'fetch', message: FD5 },
+        ...globalObjects.flatMap((object) =>
+          transportGlobals.map((property) => ({ object, property, message: FD5 })),
+        ),
       ],
       'no-restricted-imports': [
         'error',
         {
           // FD-5: HTTP client libraries outside src/api.
           paths: httpClients.map((name) => ({ name, message: FD5 })),
-          // FD-8: anything below an api/ directory, e.g. '../api/config' or a future
-          // '../api/generated/types'; '../api' (the public surface) stays allowed.
-          patterns: [{ regex: '^(\\.{1,2}/)+(.*/)?api/.+', message: FD8 }],
+          // FD-8: static imports of the API boundary's internal files.
+          patterns: [{ regex: apiInternal, message: FD8 }],
         },
       ],
     },
