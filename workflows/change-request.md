@@ -44,7 +44,7 @@ Same segments as `feature-development.md` (see `segments.md`), same gates, small
 | **REVIEW** — narrow: the change diff | Reviewer (fresh session / read-only subagent) | `prompts/review.md` | Findings or "clean". |
 | **TRIAGE** | Human | — | **[GATE: human]** real / noise / investigate. |
 | **VERIFY** | QA | `prompts/verify.md` | Criterion ↔ evidence table for changed **and** preserved criteria. **UI change: before/after screenshots are the evidence.** |
-| **SHIP** | Human | — | **[GATE: human]** DoD → PR → current-head CI check (three checks green on the PR's head SHA, `docs/git.md`) → merge pinned to that SHA → mini-spec moves to `specs/done/`, `Status: Shipped`. |
+| **SHIP** | Human | — | **[GATE: human]** DoD → mini-spec moves to `specs/done/`, `Status: Shipped` (last commit on the branch) → PR → current-head CI check (three checks green on the PR's head SHA, `docs/git.md`) → merge pinned to that SHA. |
 
 The status machine is the one in `specs/TEMPLATE.md`: Draft → Approved → In progress → Shipped.
 `scripts/doctor` applies the same spec/plan consistency checks to mini-specs.
