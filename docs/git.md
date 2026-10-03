@@ -94,6 +94,7 @@ branch protection'ı açma adımı plan kısıtı nedeniyle yapılamadı; yukar�
 - Merge edilmiş PR'ın remote branch'ini elle silmek, PR `MERGED` durumdayken ve branch tip'i PR'ın
   merge edilen head SHA'sıyla aynıyken yapılır (`gh pr view <n> --json state,headRefOid`); böylece
   merge'den sonra branch'e eklenmiş bir commit kaybolmaz.
-- Merge edilmeden kapanan PR'ın (superseded, devredilmiş, reddedilmiş) branch'i, PR'da kapanış
-  gerekçesi kayıtlıyken silinebilir; içerik PR üzerinden GitHub'da erişilebilir kalır.
+- Merge edilmeden kapanan PR'ın (superseded, devredilmiş, reddedilmiş) remote branch'i, PR'da kapanış
+  gerekçesi kayıtlıyken ve branch tip'i PR'ın kayıtlı head SHA'sıyla aynıyken elle silinebilir
+  (`gh pr view <n> --json state,headRefOid`); içerik PR üzerinden GitHub'da erişilebilir kalır.
 - Açık PR'a bağlı branch silinmez.
