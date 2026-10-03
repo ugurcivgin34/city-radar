@@ -1,6 +1,6 @@
 # ADR 0006 — `main` branch protection GitHub tarafından zorlanmıyor; süreçle telafi ediliyor
 
-- Status: Accepted
+- Status: Superseded by ADR 0007
 - Date: 2026-10-03
 
 ## Context
