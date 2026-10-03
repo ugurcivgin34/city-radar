@@ -89,7 +89,8 @@ davranış problemi, bir incident ya da repo koşullarının değişmesidir (ADR
   SHA'ya sabitlenerek yapıldı — çözülmüş).
 - `main`'e commit'i ya da force push'un tüm varyantlarını engelleyen yeni hook veya tooling; mevcut
   deny kuralları yalnızca belgelenir.
-- `adapters/` kopyaları, `workflows/segments.md` handoff metinleri ve NuGet/npm Dependabot ayarları.
+- `adapters/` kopyaları ve NuGet/npm Dependabot ayarları. (`workflows/segments.md`'deki SHIP handoff
+  sırası review 1 M-1 ile kapsama alındı — insan kararı, 2026-10-03; dosyanın geri kalanı kapsam dışı.)
 - Ürün feature'ları, OD-1, OD-2.
 
 ## Definition of Done
