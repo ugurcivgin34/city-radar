@@ -1,0 +1,19 @@
+{
+  "_comment": "npm audit exceptions (ADR 0009). Exact advisory ids only, each with a reason and an expiry date; an expired exception fails scripts/security-check.",
+  "exceptions": [
+    {
+      "id": "GHSA-vfj7-8cjw-p6xm",
+      "package": "braces",
+      "reason": "No patched version; reached only via @expo/cli -> @expo/metro-file-map -> micromatch (build tooling, not in the app bundle).",
+      "adr": "docs/decisions/0009-npm-audit-exception-expo-cli.md",
+      "expires": "2026-12-31"
+    },
+    {
+      "id": "GHSA-86w9-cpqp-85rv",
+      "package": "node-forge",
+      "reason": "No patched version; reached only via @expo/cli -> @expo/code-signing-certificates (build tooling; expo-updates code signing is not used).",
+      "adr": "docs/decisions/0009-npm-audit-exception-expo-cli.md",
+      "expires": "2026-12-31"
+    }
+  ]
+}

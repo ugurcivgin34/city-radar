@@ -1,8 +1,7 @@
 #!/bin/sh
 # City Radar security check — dependency vulnerability scanning (docs/security.md).
 # Separate from scripts/check on purpose: a vulnerability-database/registry outage must not look
-# like a test failure. CI runs both. The NuGet part never SKIPs (spec 0001); the npm part SKIPs
-# visibly until the mobile project exists.
+# like a test failure. CI runs both. Neither part ever SKIPs (spec 0001, spec 0003).
 # Exceptions are never silent ignores: they need a reasoned, ideally time-boxed decision/ADR.
 set -u
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
@@ -40,14 +39,22 @@ fi
 rm -rf "$nuget_json" "$nuget_err" "$nuget_cache"
 
 echo "==> npm-audit"
-if [ -f mobile/package.json ]; then
-  # high/critical vulnerabilities in production dependencies fail the check.
-  if ! (cd mobile && npm audit --omit=dev --audit-level=high); then
-    echo "SECURITY: npm audit reported high/critical production vulnerabilities (or audit could not run)" >&2
-    failed=1
-  fi
+# Fail-closed, three outcomes like NuGet (spec 0003 AC-15): `npm audit` exits non-zero for both
+# vulnerabilities and registry failures, so its JSON is parsed by scripts/npm-audit.mjs.
+# Exceptions only via mobile/audit-exceptions.json (exact advisory ids, expiry; ADR 0009).
+if [ ! -f mobile/package.json ]; then
+  echo "SECURITY: mobile/package.json yok — npm adımı SKIP edilemez (spec 0003)" >&2
+  failed=1
 else
-  echo "SKIP: mobile/package.json yok"
+  npm_json=$(mktemp)
+  (cd mobile && npm audit --omit=dev --json >"$npm_json" 2>/dev/null)
+  node scripts/npm-audit.mjs "$npm_json" mobile/audit-exceptions.json
+  case $? in
+    0) ;;
+    3) echo "SECURITY: high/critical production vulnerabilities in npm dependencies" >&2; failed=1 ;;
+    *) echo "SECURITY INFRA FAILURE: npm audit could not complete" >&2; failed=1 ;;
+  esac
+  rm -f "$npm_json"
 fi
 
 if [ "$failed" -ne 0 ]; then
