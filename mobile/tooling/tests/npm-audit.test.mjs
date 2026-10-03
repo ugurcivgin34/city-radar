@@ -84,6 +84,23 @@ describe('evaluateAudit', () => {
     assert.equal(result.expired.length, 1);
   });
 
+  test('a malformed exception never widens the exception → 3', () => {
+    const highBraces = report(advisory('braces', 'high', 'GHSA-aaaa'));
+    for (const bad of [
+      { id: 'GHSA-aaaa', package: 'braces' },
+      { id: 'GHSA-aaaa', package: 'braces', expires: '31.12.2026' },
+      { id: 'GHSA-aaaa', package: 'braces', expires: '2026-02-30' },
+      { id: '', package: 'braces', expires: '2026-12-31' },
+      { id: 'GHSA-aaaa', package: '', expires: '2026-12-31' },
+    ]) {
+      const result = evaluateAudit(highBraces, { exceptions: [bad] }, '2026-10-03');
+      assert.equal(result.code, 3, JSON.stringify(bad));
+      assert.equal(result.excepted.length, 0, JSON.stringify(bad));
+      assert.equal(result.invalid.length, 1, JSON.stringify(bad));
+    }
+    assert.equal(evaluateAudit(report(), {}, '2026-10-03').code, 3);
+  });
+
   test('an exception that is no longer reported is listed as unused', () => {
     assert.equal(evaluateAudit(report(), exceptions, '2026-10-03').unused.length, 1);
   });
