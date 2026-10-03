@@ -1,6 +1,6 @@
 # ADR 0007 — `main` koruması: merge kuralları repo ayarıyla, diğer kurallar süreçle zorlanıyor
 
-- Status: Accepted
+- Status: Superseded by ADR 0008
 - Date: 2026-10-03
 
 ADR 0006'nın yerine geçer. Güncel kararın tamamı bu ADR'dedir; ADR 0006 yalnızca tarihsel kayıttır.

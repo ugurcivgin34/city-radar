@@ -59,34 +59,29 @@ atılabilir" anlamına gelmez. Sonrasında tüm iş branch + PR ile yürür.
 - PR template checklist completed; `scripts/check` green in CI; squash-merge (main geçmişi work
   item başına temiz kalır).
 - Merge için zorunlu CI kontrolleri: `doctor --strict`, `scripts/check`, `scripts/security-check`.
-- **Current-head CI kuralı (her PR merge'ü, Dependabot dahil — ADR 0007):** merge'den önce üç
-  zorunlu check PR'ın **güncel head SHA'sında** yeşildir ve merge o SHA'ya sabitlenir
-  (`gh pr merge <n> --squash --match-head-commit <sha>`). Merge kararı insanındır; agent yalnızca
-  insan onayıyla merge eder. Normal PR'larda bu doğrulama PR template'teki gate maddesiyle kayda
+- **Current-head CI kuralı (her PR merge'ü, Dependabot dahil — ADR 0008):** merge'den önce üç
+  zorunlu check PR'ın **güncel head SHA'sında** yeşildir (GitHub branch protection zorlar) ve merge
+  o SHA'ya sabitlenir (`gh pr merge <n> --squash --match-head-commit <sha>`; süreç kuralı). Merge
+  kararı insanındır; agent yalnızca insan onayıyla merge eder. Normal PR'larda bu doğrulama PR template'teki gate maddesiyle kayda
   geçer; kural template'e bağlı değildir.
 - PR ilgili spec ve plan referansını içerir; kabul kriteri ↔ test eşleşmesi PR açıklamasından veya
   plan dosyasından izlenebilir.
 - Repo tek geliştiricili: ikinci insan reviewer zorunlu değil; bağımsız review ANEW workflow'unda
   zaten uygulanır. Ekip büyürse required human review eklenir (strict tetikleyicileri: ADR 0005).
 
-## Branch protection — kısmen repo ayarıyla, kalanı süreçle (ADR 0007)
-Hedeflenen kurallar `main` için geçerlidir: PR zorunlu · required checks (yukarıdaki üçü) · force
-push yok · branch silme yok · yalnızca squash. Repo private ve ücretsiz planda olduğu için GitHub
-branch protection/rulesets kullanılamıyor (API 403). Durum:
-- **GitHub tarafından zorlanan:** yalnızca squash merge (merge commit ve rebase merge repo
-  ayarında kapalı); merge edilen PR branch'inin otomatik silinmesi (repo ayarı); `main` default
-  branch olduğu sürece silinemez (GitHub platform davranışı).
-- **Zorlanmayan (GitHub izin verir):** `main`'e doğrudan commit/push, force push, check'leri head
-  SHA'da yeşil olmayan PR'ın merge edilmesi, default branch değiştirildikten sonra `main`'in silinmesi.
-- **Telafi:** CI üç check'i her push/PR'da çalıştırır (kırmızı görünür, merge'i engellemez);
-  current-head CI kuralı ("Pull requests"); agent kuralları ("Forbidden") ve Claude Code'daki
-  `git push --force` / `git push -f` deny kuralları (yalnızca Claude Code, tüm varyantları
-  yakalamaz); bağımsız review ve PR şablonundaki gate kayıtları.
-- Repo public olursa veya Pro/Team planına geçilirse protection hemen açılır (ADR 0007 revisit
-  triggers).
+## Branch protection — GitHub tarafından zorlanıyor (ADR 0008)
+Repo 2026-10-03'te public yapıldı; `main` için branch protection açık:
+- PR zorunlu (gereken onay sayısı 0; bağımsız review ANEW sürecinde yapılır). `main`'e doğrudan
+  push reddedilir; kural admin'leri de kapsar (`enforce_admins`).
+- Zorunlu check'ler: `doctor`, `check`, `security-check`; PR'ın head commit'inde geçmeden merge yok.
+- Force push ve `main`'in silinmesi kapalı; linear history zorunlu; çözülmemiş review konuşması
+  merge'ü bloklar.
+- Repo ayarı: yalnızca squash merge; merge edilen PR branch'i otomatik silinir.
+- Süreçle kalan: merge kararı insanındır ve merge doğrulanan head SHA'ya sabitlenir ("Pull requests").
+- Repo yeniden private yapılırsa ücretsiz planda protection uygulanmaz (ADR 0008 revisit triggers).
 
-Bootstrap açık aksiyonları tamamlandı (2026-10-03): repo, `origin`, bootstrap push, CI. `main`
-branch protection'ı açma adımı plan kısıtı nedeniyle yapılamadı; yukarıdaki durum geçerlidir.
+Bootstrap açık aksiyonları tamamlandı (2026-10-03): repo, `origin`, bootstrap push, CI ve `main`
+branch protection (repo public yapıldıktan sonra).
 
 ## Branch cleanup
 - Merge edilen PR'ın remote branch'ini GitHub otomatik siler (repo ayarı). Lokalde:

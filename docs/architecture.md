@@ -135,5 +135,5 @@ historical analytics, web client, background location, E2E test altyapısı.
 - **README:** City Radar README'si yazıldı (spec 0001); mobil setup feature'ı mobil bölümlerini doldurur.
 - **Release requirement (v1'i bloklamaz, store yayınını bloklar):** gizlilik politikası, KVKK
   bilgilendirmeleri, app store privacy declarations (`docs/security.md`).
-- **Remote / branch protection:** remote kuruldu; `main` branch protection GitHub planı nedeniyle
-  kullanılamıyor; squash-only repo ayarıyla, kalan kurallar süreçle (`docs/git.md`, ADR 0007).
+- **Remote / branch protection:** remote kuruldu; repo public, `main` branch protection açık ve
+  GitHub tarafından zorlanıyor (`docs/git.md`, ADR 0008).

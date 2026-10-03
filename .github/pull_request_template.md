@@ -26,7 +26,7 @@
 - [ ] Docs / ADRs updated if behavior or architecture changed
 - [ ] No tests weakened, deleted, or skipped
 - [ ] `./scripts/doctor --strict` passes (CI enforces the spec/plan gates)
-- [ ] Before merge: all three checks green on the PR's **current head SHA**; merge pinned to that SHA (`docs/git.md`, ADR 0007)
+- [ ] Before merge: all three checks green on the PR's **current head SHA**; merge pinned to that SHA (`docs/git.md`, ADR 0008)
 
 ## Evidence
 <!-- Paste the check output summary. -->
