@@ -1,6 +1,6 @@
 # Spec 0002 — Git & CI Process Closure (mini)
 
-- Status: In progress
+- Status: Shipped
 - Spec approved by / on: Uğur Okan Çivgin, 2026-10-03
 - Mode: lite
 - Plan: `specs/plans/0002-plan.md`
@@ -16,18 +16,18 @@ alınır. Bu iş ship edildiğinde Git/süreç konusu kapanır; yeniden açılma
 davranış problemi, bir incident ya da repo koşullarının değişmesidir (ADR 0007 revisit triggers).
 
 ## Changed behavior
-- [ ] CB-1 — **Merge ayarları:** Repo yalnızca squash merge'e izin verir; merge commit ve rebase
+- [x] CB-1 — **Merge ayarları:** Repo yalnızca squash merge'e izin verir; merge commit ve rebase
   merge GitHub tarafından reddedilir. Merge edilen PR'ın head branch'i GitHub tarafından otomatik
   silinir. *(Ayar 2026-10-03'te insan onayıyla, bu spec'ten önce uygulandı; kanıt VERIFY'da repo
   ayarlarının geri okunmasıyla verilir.)*
-- [ ] CB-2 — **Branch hijyeni:** Ship anında remote'ta yalnızca `main` ve açık PR'lara ait
+- [x] CB-2 — **Branch hijyeni:** Ship anında remote'ta yalnızca `main` ve açık PR'lara ait
   branch'ler bulunur; merge edilmiş branch kalmaz. `docs/git.md`, merge sonrası branch'in nasıl
   temizlendiğini (otomatik silme + lokal temizlik) ve elle silme için iki ayrı doğrulama yolunu
   yazar: merge edilmiş PR'da PR `MERGED` ve branch tip'i = PR'ın head SHA'sı; merge edilmeden
   kapanan PR'da kapanış gerekçesi PR'da kayıtlı ve branch tip'i = PR'ın kayıtlı head SHA'sı. Açık
   PR'a bağlı branch silinmez. *(Review 1 L-1 / review 2 N-1 ile düzeltildi — insan kararı,
   2026-10-03.)*
-- [ ] CB-3 — **Review kanıt kayıtları (geçmiş yeniden yazılmaz):**
+- [x] CB-3 — **Review kanıt kayıtları (geçmiş yeniden yazılmaz):**
   - PR #6: kayıt "review pre-merge yapıldı, kayıt post-merge eklendi" olarak yazılır. Bağımsız
     review raporu yorum olarak eklenir; yorum gerçek zaman çizelgesini verir (review başlangıç/bitiş,
     review anındaki CI durumu, merge zamanı ve merge edilen head SHA).
@@ -35,7 +35,7 @@ davranış problemi, bir incident ya da repo koşullarının değişmesidir (ADR
     **"POST-MERGE RETROSPECTIVE"** olan bir yorumla kaydedilir.
   - Eski gate'ler sonradan yapılmış ya da merge öncesinde yapılmış gibi gösterilmez; merge edilmiş
     PR'ların açıklamaları ve checklist'leri düzenlenmez, kanıt yalnızca yeni yorumlarla eklenir.
-- [ ] CB-4 — **ADR 0007:** ADR 0006'nın yerini alır ve güncel kararın tamamını içerir. PR #6 review
+- [x] CB-4 — **ADR 0007:** ADR 0006'nın yerini alır ve güncel kararın tamamını içerir. PR #6 review
   bulguları 1–5'i karşılar:
   1. squash-only artık repo ayarıyla zorlanır;
   2. current-head CI doğrulaması bu kararla getirilen bir süreç kuralıdır ("bugün var olan kontrol"
@@ -47,10 +47,10 @@ davranış problemi, bir incident ya da repo koşullarının değişmesidir (ADR
   5. ilke atfı repodaki kaynağa (`docs/conventions.md`) yapılır.
   Revisit triggers Git/süreç konusunun hangi koşullarda yeniden açılacağını içerir. ADR 0006'da
   yalnızca `Status` satırı `Superseded by ADR 0007` olarak değişir.
-- [ ] CB-5 — **`docs/git.md` tutarlılığı:** Branch protection bölümü ADR 0007 ile aynı şeyi söyler;
+- [x] CB-5 — **`docs/git.md` tutarlılığı:** Branch protection bölümü ADR 0007 ile aynı şeyi söyler;
   "zorlanan" ve "zorlanmayan" listeleri repo ayarlarının gerçek durumuyla eşleşir. Bulgu 6'daki
   sarkan "5. adım" referansı kalmaz.
-- [ ] CB-6 — **Universal current-head CI gate:**
+- [x] CB-6 — **Universal current-head CI gate:**
   - Kural: her PR merge'ünden önce (Dependabot PR'ları dahil) üç zorunlu check (`doctor --strict`,
     `scripts/check`, `scripts/security-check`) PR'ın **güncel head SHA'sında** yeşildir ve merge o
     SHA'ya sabitlenir.
@@ -59,7 +59,7 @@ davranış problemi, bir incident ya da repo koşullarının değişmesidir (ADR
     merge'den önce gelen bir adım olarak listeler.
   - PR template'teki gate maddesi, bu kuralın normal PR'lardaki görünür kaydıdır; kuralın kendisi
     template'e bağlı değildir (template kullanmayan Dependabot PR'larında da geçerlidir).
-- [ ] CB-7 — **CI action major yükseltmeleri (D-1, D-2):** Work item ship edildiğinde final state:
+- [x] CB-7 — **CI action major yükseltmeleri (D-1, D-2):** Work item ship edildiğinde final state:
   - `main` üzerindeki CI `actions/checkout@v7` ve `actions/setup-dotnet@v6` kullanır.
   - Her iki yükseltme için release notes değerlendirmesi, açık insan onayı ve current-head CI
     doğrulaması (CB-6) tamamlanmış ve kayıtlıdır.
@@ -69,22 +69,22 @@ davranış problemi, bir incident ya da repo koşullarının değişmesidir (ADR
     merge sonrası **ship-time housekeeping**'dir: otomatik kapandılarsa bu, kapanmadılarsa
     "superseded" yorumuyla kapatılmaları PR #7'ye yorumla kanıt olarak kaydedilir. Bu kısım VERIFY
     kriteri değildir. *(Review 1 M-2 ile düzeltildi — insan kararı, 2026-10-03.)*
-- [ ] CB-8 — **setup-node devri:** Dependabot #4 merge edilmeden kapatılır. Gerekçe PR'da yazılır:
+- [x] CB-8 — **setup-node devri:** Dependabot #4 merge edilmeden kapatılır. Gerekçe PR'da yazılır:
   Node adımı `mobile/.nvmrc` olmadan çalışmıyor; doğrulanmamış bir yükseltme alınmıyor.
   `actions/setup-node` major yükseltmesinin Mobile Foundation'a devredildiği repoda kalıcı bir yerde
   kayıtlıdır. CI'daki setup-node sürümü v4 olarak kalır.
 
 ## Preserved behavior
-- [ ] PB-1 — `./scripts/check` ve `./scripts/doctor --strict` yeşil kalır; backend test sayısı
+- [x] PB-1 — `./scripts/check` ve `./scripts/doctor --strict` yeşil kalır; backend test sayısı
   baseline'ın (71) altına düşmez; hiçbir test zayıflatılmaz, silinmez ya da atlanmaz.
-- [ ] PB-2 — CI'daki üç job (`doctor`, `check`, `security-check`) aynı adlarla, aynı tetikleyicilerle
+- [x] PB-2 — CI'daki üç job (`doctor`, `check`, `security-check`) aynı adlarla, aynı tetikleyicilerle
   (her push ve PR) ve aynı komutlarla çalışmaya devam eder. Node adımının `mobile/.nvmrc` koşulu ve
   .NET'in `backend/global.json`'dan alınması korunur.
-- [ ] PB-3 — `specs/done/` altındaki shipped spec ve ADR 0001–0005 değişmez. ADR 0006'da `Status`
+- [x] PB-3 — `specs/done/` altındaki shipped spec ve ADR 0001–0005 değişmez. ADR 0006'da `Status`
   satırı dışında hiçbir satır değişmez.
-- [ ] PB-4 — `docs/git.md`'deki trivial lane politikası, branch/commit adlandırma kuralları ve
+- [x] PB-4 — `docs/git.md`'deki trivial lane politikası, branch/commit adlandırma kuralları ve
   "Forbidden" kuralları anlam olarak değişmez.
-- [ ] PB-5 — Backend ve mobil ürün kodu değişmez (`backend/` altında dosya değişikliği yok).
+- [x] PB-5 — Backend ve mobil ürün kodu değişmez (`backend/` altında dosya değişikliği yok).
 
 ## Out of scope
 - `actions/setup-node` major yükseltmesi → Mobile Foundation (CB-8 yalnızca devri kayda geçirir).
@@ -100,7 +100,16 @@ davranış problemi, bir incident ya da repo koşullarının değişmesidir (ADR
 - Ürün feature'ları, OD-1, OD-2.
 
 ## Definition of Done
-- [ ] `scripts/check` green
-- [ ] Independent review done; real findings fixed, noise rejected with written rationale
-- [ ] Criterion ↔ evidence table complete for CB-* **and** PB-* (UI: before/after screenshots)
-- [ ] Spec moved to `specs/done/` (immutable there)
+- [x] `scripts/check` green
+- [x] Independent review done; real findings fixed, noise rejected with written rationale
+- [x] Criterion ↔ evidence table complete for CB-* **and** PB-* (UI: before/after screenshots)
+- [x] Spec moved to `specs/done/` (immutable there)
+
+Ship kaydı (2026-10-03, Uğur Okan Çivgin): VERIFY — bağımsız QA, PR #7 head `dd53b3b` — CB-1…CB-8
+(VERIFY kısımları) ve PB-1…PB-5 **Met**; kriterlerde gap yok. Bağımsız review 3 tur: review 1
+(2 Medium, 2 Low, 4 Info), fix round 1 re-review (1 Medium, 1 Low, 3 Info), fix round 2 re-review
+(clean); triage kayıtları `specs/plans/0002-plan.md`. QA Low bulgusu (PR #7 gate kayıtları boş) real →
+SHIP'te merge öncesinde PR #7'ye yorum olarak eklenen review/triage/VERIFY kayıtlarıyla kapatıldı.
+Ship-time kanıtlar bu commit'ten **sonra** oluşur ve bu dosyada değil PR #7 yorumlarında kayıtlıdır:
+CB-6 son head SHA'da current-head CI + o SHA'ya sabitli squash merge; CB-7 Dependabot #2/#3 kapanışı
+(housekeeping); CB-2 merge sonrası remote durumu.
