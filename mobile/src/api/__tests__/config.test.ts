@@ -25,6 +25,10 @@ describe('parseApiBaseUrl', () => {
     'https://api.example.com/?a=1',
     'https://api.example.com/#x',
     'https://exa mple.com',
+    'https://:5000',
+    'https://localhost:abc',
+    'http://user:pass@api.example.com',
+    'https://api.example.com:123456',
   ])('rejects %p as not an absolute http(s) URL', (raw) => {
     expect(() => parseApiBaseUrl(raw)).toThrow(ApiConfigError);
     expect(() => parseApiBaseUrl(raw)).toThrow(/must be an absolute http\(s\) URL/);

@@ -8,7 +8,8 @@ export class ApiConfigError extends Error {
   }
 }
 
-const HTTP_URL = /^https?:\/\/[^\s/?#]+(\/[^\s?#]*)?$/i;
+// scheme://host[:port][/path] — non-empty host, numeric port, no user:password@, no query/fragment.
+const HTTP_URL = /^https?:\/\/[^\s/?#@:]+(:\d{1,5})?(\/[^\s?#]*)?$/i;
 
 export function parseApiBaseUrl(raw: string | undefined): string {
   const value = raw?.trim();
@@ -19,7 +20,7 @@ export function parseApiBaseUrl(raw: string | undefined): string {
   }
   if (!HTTP_URL.test(value)) {
     throw new ApiConfigError(
-      'EXPO_PUBLIC_API_BASE_URL must be an absolute http(s) URL without query or fragment.',
+      'EXPO_PUBLIC_API_BASE_URL must be an absolute http(s) URL with a host, an optional numeric port, no credentials, query or fragment.',
     );
   }
   return value.replace(/\/+$/, '');
