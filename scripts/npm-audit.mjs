@@ -26,10 +26,10 @@ export function evaluateAudit(auditText, exceptionsDoc, today) {
     return { code: 2, reason: 'npm audit output is not valid JSON' };
   }
   if (audit?.error) {
-    return {
-      code: 2,
-      reason: `npm audit error: ${audit.error.code ?? ''} ${audit.error.summary ?? ''}`.trim(),
-    };
+    // Registry failures may leave error.code/summary empty and put the cause in a top-level message.
+    const parts = [audit.error.code, audit.error.summary, audit.error.detail, audit.message];
+    const cause = parts.filter((p) => typeof p === 'string' && p.trim() !== '').join(' — ');
+    return { code: 2, reason: `npm audit error: ${cause || 'no details reported'}` };
   }
   if (!audit?.metadata?.vulnerabilities || typeof audit.vulnerabilities !== 'object') {
     return { code: 2, reason: 'npm audit output has no vulnerability report' };

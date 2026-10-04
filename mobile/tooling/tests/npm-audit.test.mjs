@@ -111,4 +111,16 @@ describe('evaluateAudit', () => {
     assert.equal(evaluateAudit('not json', exceptions, '2026-10-03').code, 2);
     assert.equal(evaluateAudit('{}', exceptions, '2026-10-03').code, 2);
   });
+
+  test('a registry failure reports its cause (npm puts it in a top-level message)', () => {
+    // Shape produced by `npm audit --json` when the registry is unreachable.
+    const output = JSON.stringify({
+      message:
+        'request to http://127.0.0.1:9/-/npm/v1/security/audits/quick failed, reason: connect ECONNREFUSED 127.0.0.1:9',
+      error: { summary: '', detail: '' },
+    });
+    const result = evaluateAudit(output, exceptions, '2026-10-03');
+    assert.equal(result.code, 2);
+    assert.match(result.reason, /ECONNREFUSED 127\.0\.0\.1:9/);
+  });
 });
