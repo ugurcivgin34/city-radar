@@ -66,6 +66,7 @@ export function findSdkMismatches({ lockJson, bundledNativeModules }) {
         expected,
         installed: entry?.version,
         where,
+        rule: 'sdk',
         ...(ok === null ? { reason: 'unsupported range format (only exact, ~ and ^)' } : {}),
       });
     }
@@ -80,11 +81,21 @@ export function findSdkMismatches({ lockJson, bundledNativeModules }) {
         expected: react,
         installed: entry?.version,
         where,
-        reason: 'must equal the installed react version',
+        rule: 'react-pair',
       });
     }
   }
   return mismatches;
+}
+
+/** One-line message that names the rule actually violated (review L-1). */
+export function describeMismatch(m) {
+  const head = `EXPO SDK MISMATCH: ${m.name} installed ${m.installed}`;
+  const tail = ` (${m.where})${m.reason ? ` — ${m.reason}` : ''}`;
+  if (m.rule === 'react-pair') {
+    return `${head}, must equal the installed react (${m.expected}); align react with the SDK first${tail}`;
+  }
+  return `${head}, Expo SDK expects ${m.expected}${tail}`;
 }
 
 const readJson = (file) => JSON.parse(readFileSync(file, 'utf8'));
@@ -110,10 +121,7 @@ if (path.resolve(process.argv[1] ?? '') === fileURLToPath(import.meta.url)) {
   }
   const mismatches = findSdkMismatches(input);
   for (const m of mismatches) {
-    console.error(
-      `EXPO SDK MISMATCH: ${m.name} installed ${m.installed}, Expo SDK expects ${m.expected}` +
-        ` (${m.where})${m.reason ? ` — ${m.reason}` : ''}`,
-    );
+    console.error(describeMismatch(m));
   }
   if (mismatches.length) {
     console.error('expo-sdk: FAILED — align with `npx expo install --fix` or an SDK upgrade plan');
