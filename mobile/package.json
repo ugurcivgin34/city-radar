@@ -16,6 +16,7 @@
     "test": "jest --ci",
     "test:tooling": "node --test \"tooling/tests/*.test.mjs\"",
     "check:forbidden": "node tooling/forbidden.mjs",
+    "check:expo-sdk": "node tooling/expo-sdk.mjs",
     "export:android": "expo export --platform android --output-dir dist"
   },
   "dependencies": {
