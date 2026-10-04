@@ -45,7 +45,7 @@
     "jest-expo": "~57.0.5",
     "prettier": "3.9.9",
     "react-dom": "19.2.3",
-    "react-test-renderer": "19.2.3",
+    "react-test-renderer": "19.2.8",
     "typescript": "~6.0.3"
   }
 }
