@@ -1,7 +1,8 @@
 # Dependency update PRs (docs/security.md "Dependabot"): never auto-merged — every PR passes the
 # same required checks. Major version bumps need their own plan item and explicit approval.
-# npm (mobile/, spec 0003): packages that Expo moves together with the SDK only get patch updates;
-# their minor/major versions change through an Expo SDK upgrade plan (`npx expo install --fix`).
+# npm (mobile/, spec 0003, bug-fix 0011): packages that Expo pins with the SDK get NO updates here —
+# not even patch (Dependabot #10–#14 broke SDK alignment). They change only through an Expo SDK
+# upgrade plan (`npx expo install --fix`); scripts/check verifies the alignment (mobile-expo-sdk).
 version: 2
 updates:
   - package-ecosystem: nuget
@@ -28,26 +29,28 @@ updates:
       prefix: deps
     open-pull-requests-limit: 5
     ignore:
-      - dependency-name: "expo"
-        update-types: ["version-update:semver-major", "version-update:semver-minor"]
-      - dependency-name: "expo-*"
-        update-types: ["version-update:semver-major", "version-update:semver-minor"]
-      - dependency-name: "@expo/*"
-        update-types: ["version-update:semver-major", "version-update:semver-minor"]
-      - dependency-name: "jest-expo"
-        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      # Expo-managed packages (explicit list, no wildcards): the direct dependencies that the installed
+      # SDK lists in node_modules/expo/bundledNativeModules.json, plus expo, @expo/log-box and
+      # react-test-renderer (pinned to react). All updates are ignored until an SDK upgrade plan; a
+      # new Expo module must be added here (tooling/tests/expo-sdk-drift.test.mjs enforces it).
+      - dependency-name: "@expo/log-box"
+      - dependency-name: "@expo/metro-runtime"
       - dependency-name: "eslint-config-expo"
-        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "expo"
+      - dependency-name: "expo-constants"
+      - dependency-name: "expo-linking"
+      - dependency-name: "expo-router"
+      - dependency-name: "expo-status-bar"
+      - dependency-name: "jest-expo"
       - dependency-name: "react"
-        update-types: ["version-update:semver-major", "version-update:semver-minor"]
       - dependency-name: "react-dom"
-        update-types: ["version-update:semver-major", "version-update:semver-minor"]
-      - dependency-name: "react-test-renderer"
-        update-types: ["version-update:semver-major", "version-update:semver-minor"]
       - dependency-name: "react-native"
-        update-types: ["version-update:semver-major", "version-update:semver-minor"]
-      - dependency-name: "react-native-*"
-        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "react-native-gesture-handler"
+      - dependency-name: "react-native-reanimated"
+      - dependency-name: "react-native-safe-area-context"
+      - dependency-name: "react-native-screens"
+      - dependency-name: "react-native-worklets"
+      - dependency-name: "react-test-renderer"
       # Dev tools whose next versions are known to be incompatible with the SDK 57 toolchain
       # (plan 0003): ESLint 10 (eslint-config-expo -> eslint-plugin-import supports ^9 only),
       # Jest 30 / @types/jest 30 (jest-expo 57 is on Jest 29), RNTL 14 (needs test-renderer instead

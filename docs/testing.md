@@ -60,8 +60,9 @@ zorunda değil; amaç hangi kriterin hangi testle doğrulandığının görüleb
 - `jest-expo` + React Native Testing Library (13.x; jest-expo'nun `react-test-renderer`'ıyla
   uyumlu). Testler `mobile/src/**/__tests__/`; Jest test bulamazsa başarısız olur
   (`--passWithNoTests` yok).
-- **Tooling testleri:** FD-5–FD-8 lint kurallarının, `tooling/forbidden.mjs`'in ve
-  `scripts/npm-audit.mjs`'in gerçekten tetiklendiği `mobile/tooling/tests/` altında `node:test` ile
+- **Tooling testleri:** FD-5–FD-8 lint kurallarının, `tooling/forbidden.mjs`'in,
+  `tooling/expo-sdk.mjs`'in (Expo SDK uyumu ve Dependabot politikası; bug-fix 0011 reprodüksiyon
+  testi kalıcıdır) ve `scripts/npm-audit.mjs`'in gerçekten tetiklendiği `mobile/tooling/tests/` altında `node:test` ile
   doğrulanır (her kural için bir ihlal ve bir izinli örnek); ESLint 9'un ESM yükleyicisi nedeniyle
   Jest dışında çalışır (`npm run test:tooling`).
 - `scripts/check` Android production bundle/export'unu üretir (`expo export --platform android`);
