@@ -97,6 +97,7 @@ npm run typecheck        # tsc --noEmit (strict)
 npm run lint             # ESLint, FD-5 / FD-6 / FD-8 kuralları dahil
 npm run format:check     # Prettier
 npm run check:forbidden  # FD-7 yasak harita SDK'ları + FD-6 sağlayıcı host taraması
+npm run check:expo-sdk   # kurulu paketler Expo SDK'nın beklediği sürümlerde mi (npm ci sonrası)
 npm test                 # Jest (jest-expo + React Native Testing Library)
 npm run test:tooling     # mimari kuralların gerçekten tetiklendiğinin testleri (node:test)
 npm run export:android   # Android production bundle/export (cihaz ve ağ gerekmez)

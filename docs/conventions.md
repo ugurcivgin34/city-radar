@@ -79,8 +79,14 @@
   analyzers, saat kuralı = `BannedApiAnalyzers` RS0030) · `dotnet format --verify-no-changes` ·
   test (architecture testleri dahil). Paket sürümleri yalnızca `backend/Directory.Packages.props`'ta (CPM).
 - **Mobil** (`mobile/` içinde çalışır; Node `mobile/.nvmrc`): lockfile doğrulamalı install
-  (`npm ci`) · `tsc --noEmit` · ESLint (FD-5, FD-6, FD-8 dahil) · Prettier check · FD-6/FD-7
-  taraması (`tooling/forbidden.mjs`) · Jest · tooling testleri (`node:test`) · Android export.
+  (`npm ci`) · Expo SDK uyumu (`tooling/expo-sdk.mjs`: kurulu her Expo-managed paket, iç içe
+  kopyalar dahil, kurulu SDK'nın `bundledNativeModules.json`'una uyar) · `tsc --noEmit` · ESLint
+  (FD-5, FD-6, FD-8 dahil) · Prettier check · FD-6/FD-7 taraması (`tooling/forbidden.mjs`) · Jest ·
+  tooling testleri (`node:test`) · Android export.
+- Expo-managed paketler (kurulu SDK'nın listesindeki doğrudan bağımlılıklar + `expo`,
+  `@expo/log-box`, `react-test-renderer`) yalnızca Expo SDK yükseltme planıyla
+  (`npx expo install --fix`) güncellenir; Dependabot bunlar için hiçbir güncelleme açmaz (açık
+  isim listesi, wildcard yok — `.github/dependabot.yml`).
 - **Güvenlik:** dependency vulnerability taraması ayrı giriş noktasında — `scripts/security-check`
   (`docs/security.md`); CI ikisini de çalıştırır.
 - Backend ve mobil adımları hiçbir zaman `SKIP` etmez (spec 0001, spec 0003); `mobile/package.json`
