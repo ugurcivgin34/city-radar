@@ -33,6 +33,23 @@ describe('describeMismatch (L-1)', () => {
     const react = messages.find((m) => m.startsWith('EXPO SDK MISMATCH: react installed'));
     assert.match(react, /Expo SDK expects 19\.2\.3/);
   });
+
+  test('when only the renderer drifted (PR #12 shape) nothing points at react', () => {
+    const mismatches = findSdkMismatches({
+      lockJson: lockOf({
+        'node_modules/react': '19.2.3',
+        'node_modules/react-test-renderer': '19.2.8',
+      }),
+      bundledNativeModules: { react: '19.2.3' },
+    });
+    assert.equal(mismatches.length, 1, JSON.stringify(mismatches));
+    const message = describeMismatch(mismatches[0]);
+    assert.match(
+      message,
+      /react-test-renderer installed 19\.2\.8, must equal the installed react \(19\.2\.3\)/,
+    );
+    assert.doesNotMatch(message, /align react/);
+  });
 });
 
 describe('input validation fails closed (L-2)', () => {

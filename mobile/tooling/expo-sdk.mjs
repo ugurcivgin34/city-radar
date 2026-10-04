@@ -99,7 +99,8 @@ export function describeMismatch(m) {
   const head = `EXPO SDK MISMATCH: ${m.name} installed ${m.installed}`;
   const tail = ` (${m.where})${m.reason ? ` — ${m.reason}` : ''}`;
   if (m.rule === 'react-pair') {
-    return `${head}, must equal the installed react (${m.expected}); align react with the SDK first${tail}`;
+    // Only the rule: if react itself drifted, its own "Expo SDK expects" line reports it (review L-3).
+    return `${head}, must equal the installed react (${m.expected})${tail}`;
   }
   return `${head}, Expo SDK expects ${m.expected}${tail}`;
 }
