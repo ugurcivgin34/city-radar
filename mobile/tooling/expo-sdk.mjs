@@ -52,7 +52,13 @@ const packageName = (lockKey) => {
  * it records what is actually installed (package.json ranges can hide drift).
  */
 export function findSdkMismatches({ lockJson, bundledNativeModules }) {
-  const packages = Object.entries(lockJson?.packages ?? {});
+  // Fail closed (review L-2): a lockfile without a `packages` map (lockfileVersion 1) would
+  // otherwise be checked against nothing and pass.
+  const map = lockJson?.packages;
+  if (!map || typeof map !== 'object' || Array.isArray(map)) {
+    throw new Error('package-lock.json has no `packages` map (lockfileVersion >= 2 required)');
+  }
+  const packages = Object.entries(map);
   const mismatches = [];
 
   for (const [where, entry] of packages) {
@@ -119,7 +125,13 @@ if (path.resolve(process.argv[1] ?? '') === fileURLToPath(import.meta.url)) {
     console.error(`expo-sdk: cannot read input: ${error.message}`);
     process.exit(2);
   }
-  const mismatches = findSdkMismatches(input);
+  let mismatches;
+  try {
+    mismatches = findSdkMismatches(input);
+  } catch (error) {
+    console.error(`expo-sdk: cannot read input: ${error.message}`);
+    process.exit(2);
+  }
   for (const m of mismatches) {
     console.error(describeMismatch(m));
   }
