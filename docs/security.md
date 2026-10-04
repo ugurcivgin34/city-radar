@@ -62,6 +62,8 @@
 - .NET CLI ve test platformu telemetrisi kapalıdır: `DOTNET_CLI_TELEMETRY_OPTOUT=1`,
   `TESTINGPLATFORM_TELEMETRY_OPTOUT=1` — `scripts/check`, `scripts/security-check` ve CI aynı
   ayarı kullanır (minimum data; review F-6, 2026-10-02).
+- Expo CLI telemetrisi kapalıdır: `EXPO_NO_TELEMETRY=1` — `scripts/check` (`mobile-export` adımı)
+  ve CI aynı ayarı kullanır; README mobil komutlar için aynısını önerir (spec 0003).
 
 ## Dependencies
 - Yeni runtime dependency plan içinde açıkça yazılır — paket, neden gerekli, değerlendirilen

@@ -6,3 +6,6 @@ scripts/* text eol=lf
 *.md text
 *.yml text
 *.json text
+# Mobile: LF in the working copy on every OS so Prettier's check agrees locally and in CI
+# (plan 0003, R-3); text=auto keeps binaries (PNG assets) untouched.
+mobile/** text=auto eol=lf

@@ -57,7 +57,15 @@ zorunda değil; amaç hangi kriterin hangi testle doğrulandığının görüleb
   yüzey bulunması birincil güvenceyi bozmaz.
 
 **Mobil**
-- `jest-expo` + React Native Testing Library.
+- `jest-expo` + React Native Testing Library (13.x; jest-expo'nun `react-test-renderer`'ıyla
+  uyumlu). Testler `mobile/src/**/__tests__/`; Jest test bulamazsa başarısız olur
+  (`--passWithNoTests` yok).
+- **Tooling testleri:** FD-5–FD-8 lint kurallarının, `tooling/forbidden.mjs`'in ve
+  `scripts/npm-audit.mjs`'in gerçekten tetiklendiği `mobile/tooling/tests/` altında `node:test` ile
+  doğrulanır (her kural için bir ihlal ve bir izinli örnek); ESLint 9'un ESM yükleyicisi nedeniyle
+  Jest dışında çalışır (`npm run test:tooling`).
+- `scripts/check` Android production bundle/export'unu üretir (`expo export --platform android`);
+  bu adım export başarısını kanıtlar, uygulamanın bir cihazda açıldığını kanıtlamaz.
 - Component ve hook testlerinde network doğrudan mock'lanmaz; **`mobile/src/api` boundary'si**
   test double olur (`Screen → useNearbyParking → api boundary ← test double`). API client'ın
   kendi testinde fetch/transport mock'lanabilir.

@@ -1,6 +1,7 @@
 # Dependency update PRs (docs/security.md "Dependabot"): never auto-merged — every PR passes the
 # same required checks. Major version bumps need their own plan item and explicit approval.
-# npm (mobile/) is added by the mobile setup feature once its manifest exists.
+# npm (mobile/, spec 0003): packages that Expo moves together with the SDK only get patch updates;
+# their minor/major versions change through an Expo SDK upgrade plan (`npx expo install --fix`).
 version: 2
 updates:
   - package-ecosystem: nuget
@@ -18,3 +19,47 @@ updates:
     commit-message:
       prefix: ci
     open-pull-requests-limit: 5
+
+  - package-ecosystem: npm
+    directory: /mobile
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: deps
+    open-pull-requests-limit: 5
+    ignore:
+      - dependency-name: "expo"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "expo-*"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "@expo/*"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "jest-expo"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "eslint-config-expo"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "react-test-renderer"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "react-native"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "react-native-*"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      # Dev tools whose next versions are known to be incompatible with the SDK 57 toolchain
+      # (plan 0003): ESLint 10 (eslint-config-expo -> eslint-plugin-import supports ^9 only),
+      # Jest 30 / @types/jest 30 (jest-expo 57 is on Jest 29), RNTL 14 (needs test-renderer instead
+      # of jest-expo's react-test-renderer), TypeScript >= 6.1 (@typescript-eslint/parser <6.1.0).
+      # They move with an Expo SDK upgrade plan.
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "jest"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@types/jest"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@testing-library/react-native"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]

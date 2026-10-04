@@ -75,10 +75,10 @@ edilebilen hiçbir kural yalnızca dokümana veya hafızaya bırakılmaz.
 | FD-2 | `Parking`, `Traffic`, `Shared`; `CityRadar.Infrastructure`, `CityRadar.Api`, ASP.NET Core, `Microsoft.Extensions.Caching.*`, `HttpClient`/`System.Net.Http` tabanlı provider erişimine bağımlı olmaz. Yalnızca gerçekten business katmanına ait olmayan teknik bağımlılıklar yasaktır; sırf framework bağımlılığını sıfırlamak için anlamsız abstraction üretilmez (YAGNI). | `ProjectReferenceTests` (Sdk, FrameworkReference, PackageReference) + `ModuleDependencyTests` (IL) |
 | FD-3 | Provider DTO'ları `CityRadar.Infrastructure.Providers.<Provider>.Dtos` altında yaşar ve `internal`'dır. Api, Parking ve Traffic hiçbir `CityRadar.Infrastructure.Providers.*` tipine bağımlı olmaz; dönüşüm adapter sınırında yapılır. Api, Infrastructure'ı yalnızca `Providers.*` dışındaki composition yüzeyi üzerinden kullanır. (`Providers.*` altındaki DTO dışı tiplerin internal olması zorunlu değildir; seçilirse ayrıca kararlaştırılır.) | `ModuleDependencyTests` (IL) |
 | FD-4 | Api contract'ları (`CityRadar.Api.Contracts.*`) Shared/Parking/Traffic tiplerine **hiçbir şekilde** (public yüzey, internal üye, method gövdesi) bağımlı olmaz; domain → contract mapping `Contracts` namespace'i dışında yapılır. *Spec 0001 ile bilinçli olarak sıkılaştırıldı (insan kararı, review F-2, 2026-10-02).* | `ModuleDependencyTests` (IL) |
-| FD-5 | Mobilde HTTP (`fetch`, `axios` veya seçilecek client) yalnızca `mobile/src/api/` içinde kullanılır. | ESLint (`no-restricted-globals` / `no-restricted-imports`) |
-| FD-6 | Mobil kaynakta provider endpoint/host bilgisi (`ibb.gov.tr`, İSPARK host'ları) bulunmaz. Kontrol URL/host'a odaklanır; UI'da "İSPARK" metni serbesttir. | ESLint + `scripts/check` (defense-in-depth) |
-| FD-7 | `react-native-maps`, `@rnmapbox/maps` ve Google/Mapbox native map SDK bağımlılıkları eklenmez (MapLibre serbest). Değişiklik yalnızca ADR ile. | `scripts/check` deny-list |
-| FD-8 | Mobil API contract tipleri yalnızca `mobile/src/api/` sınırından kullanılır. | ESLint (`no-restricted-imports`) |
+| FD-5 | Mobilde HTTP (`fetch`, `axios` veya seçilecek client) yalnızca `mobile/src/api/` içinde kullanılır. | ESLint (`no-restricted-globals`, `no-restricted-properties`, `no-restricted-imports`; `mobile/eslint.config.js`) + `mobile/tooling/tests/eslint-rules.test.mjs` |
+| FD-6 | Mobil kaynakta provider endpoint/host bilgisi (`ibb.gov.tr`, İSPARK host'ları) bulunmaz. Kontrol URL/host'a odaklanır; UI'da "İSPARK" metni serbesttir. Host listesi (`mobile/tooling/provider-hosts.js`) OD-1'e kadar eksiksiz değildir. | ESLint (`no-restricted-syntax`) + `mobile/tooling/forbidden.mjs` (`mobile-forbidden` check adımı, defense-in-depth) + testler |
+| FD-7 | `react-native-maps`, `@rnmapbox/maps` ve Google/Mapbox native map SDK bağımlılıkları eklenmez (MapLibre serbest). Değişiklik yalnızca ADR ile. | `mobile/tooling/forbidden.mjs` deny-list — `package.json` + lockfile ağacı (`mobile-forbidden` check adımı) + testler |
+| FD-8 | Mobil API contract tipleri yalnızca `mobile/src/api/` sınırından kullanılır. | ESLint (`no-restricted-imports`: `src/api` dışından `api/` iç yolları yasak, public yüzey `src/api/index.ts`; `no-restricted-syntax`: dinamik `import()`) + testler |
 
 Architecture test kütüphanesi: **ArchUnitNET** (`TngTech.ArchUnitNET.xUnitV3`) — tek kütüphane;
 gerekçe plan 0001'de (OD-3). Kurallar namespace/assembly tabanlıdır; yeni tipler otomatik kapsanır.
@@ -129,10 +129,10 @@ historical analytics, web client, background location, E2E test altyapısı.
 ## Setup feature'larına devredilenler
 - ~~Backend setup~~ — **yapıldı (spec 0001):** NU1900–NU1904 `WarningsNotAsErrors`; diğer tüm
   warning'ler hata; vulnerability enforcement `scripts/security-check`.
-- **Mobil setup:** paket yöneticisi **npm**; `package-lock.json` source control'a girer, CI ve
-  `scripts/check` `npm ci` kullanır.
-- **Dependabot:** NuGet + GitHub Actions eklendi (spec 0001); npm mobil setup feature'ında eklenir.
-- **README:** City Radar README'si yazıldı (spec 0001); mobil setup feature'ı mobil bölümlerini doldurur.
+- ~~Mobil setup~~ — **yapıldı (spec 0003):** Expo SDK 57, Node 22.23.3 (`mobile/.nvmrc`), paket
+  yöneticisi **npm**; `package-lock.json` source control'da, CI ve `scripts/check` `npm ci` kullanır.
+- **Dependabot:** NuGet + GitHub Actions (spec 0001) ve npm `/mobile` (spec 0003) eklendi.
+- **README:** City Radar README'si yazıldı (spec 0001); mobil bölümleri dolduruldu (spec 0003).
 - **Release requirement (v1'i bloklamaz, store yayınını bloklar):** gizlilik politikası, KVKK
   bilgilendirmeleri, app store privacy declarations (`docs/security.md`).
 - **Remote / branch protection:** remote kuruldu; repo public, `main` branch protection açık ve
