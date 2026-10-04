@@ -78,7 +78,7 @@ edilebilen hiçbir kural yalnızca dokümana veya hafızaya bırakılmaz.
 | FD-5 | Mobilde HTTP (`fetch`, `axios` veya seçilecek client) yalnızca `mobile/src/api/` içinde kullanılır. | ESLint (`no-restricted-globals`, `no-restricted-properties`, `no-restricted-imports`; `mobile/eslint.config.js`) + `mobile/tooling/tests/eslint-rules.test.mjs` |
 | FD-6 | Mobil kaynakta provider endpoint/host bilgisi (`ibb.gov.tr`, İSPARK host'ları) bulunmaz. Kontrol URL/host'a odaklanır; UI'da "İSPARK" metni serbesttir. Host listesi (`mobile/tooling/provider-hosts.js`) OD-1'e kadar eksiksiz değildir. | ESLint (`no-restricted-syntax`) + `mobile/tooling/forbidden.mjs` (`mobile-forbidden` check adımı, defense-in-depth) + testler |
 | FD-7 | `react-native-maps`, `@rnmapbox/maps` ve Google/Mapbox native map SDK bağımlılıkları eklenmez (MapLibre serbest). Değişiklik yalnızca ADR ile. | `mobile/tooling/forbidden.mjs` deny-list — `package.json` + lockfile ağacı (`mobile-forbidden` check adımı) + testler |
-| FD-8 | Mobil API contract tipleri yalnızca `mobile/src/api/` sınırından kullanılır. | ESLint (`no-restricted-imports`: `src/api` dışından `api/` iç yolları yasak, public yüzey `src/api/index.ts`) + testler |
+| FD-8 | Mobil API contract tipleri yalnızca `mobile/src/api/` sınırından kullanılır. | ESLint (`no-restricted-imports`: `src/api` dışından `api/` iç yolları yasak, public yüzey `src/api/index.ts`; `no-restricted-syntax`: dinamik `import()`) + testler |
 
 Architecture test kütüphanesi: **ArchUnitNET** (`TngTech.ArchUnitNET.xUnitV3`) — tek kütüphane;
 gerekçe plan 0001'de (OD-3). Kurallar namespace/assembly tabanlıdır; yeni tipler otomatik kapsanır.
