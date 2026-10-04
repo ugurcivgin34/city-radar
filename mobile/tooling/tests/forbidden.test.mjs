@@ -18,8 +18,24 @@ import {
 const toolingDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const mobileRoot = path.resolve(toolingDir, '..');
 
+// The expected deny-list is written out here on purpose: iterating FORBIDDEN_PACKAGES alone would
+// let an entry be removed without any test failing (VERIFY L-1). Changing it needs an ADR (FD-7).
+const EXPECTED_FORBIDDEN = [
+  '@react-native-mapbox-gl/maps',
+  '@rnmapbox/maps',
+  'expo-maps',
+  'mapbox-gl',
+  'react-native-google-maps',
+  'react-native-mapbox-gl',
+  'react-native-maps',
+];
+
 describe('FD-7: forbidden map SDKs', () => {
-  for (const name of FORBIDDEN_PACKAGES) {
+  test('the deny-list is exactly the agreed set', () => {
+    assert.deepEqual([...FORBIDDEN_PACKAGES].sort(), EXPECTED_FORBIDDEN);
+  });
+
+  for (const name of EXPECTED_FORBIDDEN) {
     test(`reports ${name} in dependencies`, () => {
       assert.equal(findForbiddenPackages({ dependencies: { [name]: '1.0.0' } }, null).length, 1);
     });
