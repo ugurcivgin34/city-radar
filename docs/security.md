@@ -57,6 +57,13 @@
   sırasında ayrıca doğrulanır (uygulama testlerinin kapsamı dışında).
 - **Release requirement (açık):** store yayını öncesi gizlilik politikası, gerekli KVKK
   bilgilendirmeleri ve app store privacy declarations hazırlanır.
+- **Release requirement (açık, ADR 0010):** İBB trafik segment servisinin
+  (`tkmservices.ibb.gov.tr/web`) yeniden kullanımı için İBB'den **yazılı teyit** alınmadan
+  production/store yayını yapılmaz. Bu koşul geliştirmeyi bloklamaz.
+- **Release requirement (açık, ADR 0010):** İBB Açık Veri Lisansı v1.0 gereği uygulama içinde veri
+  kaynağı atfı ve lisans linki (`https://data.ibb.gov.tr/license`) gösterilir; resmî durum veya
+  onay ima edilmez. City Radar politikası olarak, resmî ilişki veya onay izlenimi vermemek için
+  İBB/İSPARK logosu kullanılmaz.
 
 ## Telemetri
 - .NET CLI ve test platformu telemetrisi kapalıdır: `DOTNET_CLI_TELEMETRY_OPTOUT=1`,
