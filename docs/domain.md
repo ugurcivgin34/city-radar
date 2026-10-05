@@ -16,8 +16,8 @@ doluluk bilgileri, harita üzerinde trafik yoğunluğu.
 | Doluluk (Occupancy) | Bir otoparka ait belirli bir zamandaki kapasite / boş kapasite durumu. | Her zaman zaman bilgisiyle birlikte: `measuredAt` ve/veya `retrievedAt`. |
 | measuredAt | Veri kaynağının bildirdiği ölçüm zamanı. Kaynak vermiyorsa `null`. | `retrievedAt` ile **asla** karıştırılmaz; yerine konmaz, onun adıyla gösterilmez. |
 | retrievedAt | City Radar'ın veriyi sağlayıcıdan aldığı zaman. Her snapshot'ta zorunlu. | Ölçüm zamanı değildir. |
-| Trafik yoğunluğu (Traffic level) | Uygulamanın normalize edilmiş trafik seviyesi: `akıcı / orta / yoğun / çok yoğun` + `bilinmiyor/veri yok`. | Dış verinin bu seviyelere dönüşüm kuralı veri kaynağı incelendikten sonra tanımlanır (açık karar). Harita sağlayıcısının trafik katmanı değildir. |
-| Veri kaynağı / Sağlayıcı (Provider) | Dış veri sağlayıcısı: v1 için İSPARK (otopark/doluluk) ve İBB trafik verisi. | Endpoint, şema, güncelleme sıklığı ve lisans **henüz doğrulanmadı** — açık karar. |
+| Trafik yoğunluğu (Traffic level) | Uygulamanın normalize edilmiş trafik seviyesi: `akıcı / orta / yoğun / çok yoğun` + `bilinmiyor/veri yok`. | Dönüşüm kuralı (ADR 0010, İBB segment renk sınıfı `C`): `C1`+`C2` → akıcı, `C3` → orta, `C4` → yoğun, `C5` → çok yoğun; `C0`, bilinmeyen kod veya verisi olmayan segment → bilinmiyor. İBB'nin "Akıcı" sınıfı (`C3`) bizde "orta"dır; sağlayıcının sınıf adları domain'e taşınmaz. Harita sağlayıcısının trafik katmanı değildir. |
+| Veri kaynağı / Sağlayıcı (Provider) | Dış veri sağlayıcısı: v1 için İSPARK (otopark/doluluk) ve İBB trafik verisi. | Endpoint, şema, güncelleme sıklığı ve lisans ADR 0010'da doğrulandı. İSPARK liste servisi ölçüm zamanı vermez (`measuredAt = null`); trafik snapshot'ının `measuredAt`'i segment servisinin top-level `Date` alanıdır. |
 | Veri Anlık Görüntüsü (Snapshot) | Bir dış kaynaktan belirli bir anda alınan otopark veya trafik durumunun normalize edilmiş hali. | Sağlayıcının ham cevabı (provider DTO) değildir. |
 | Veri Güncelliği (Freshness) | Bir snapshot'ın, veri tipi ve sağlayıcı için belirlenen kabul edilebilir yaş sınırı (freshness threshold) içinde olup olmadığı. | Eşik configuration'dan gelir; sağlayıcı/veri tipi başına tanımlanır. |
 | Bayat veri (Stale) | Veri tipine/sağlayıcıya ait freshness policy'yi aşan veri. | Gizlenmez; "güncel değil" olarak işaretlenerek gösterilir (BR-2, BR-5). |
@@ -30,8 +30,10 @@ doluluk bilgileri, harita üzerinde trafik yoğunluğu.
   Varsayılan ve seçenekler configuration'dır (ürün kullanımına göre değişebilir); izinli liste
   dışındaki yarıçap geçersiz girdidir.
 - **BR-2 — Doluluk zamanı.** Doluluk bilgisi her zaman veri zamanıyla birlikte gösterilir.
-  Freshness threshold configuration üzerinden yönetilir; kesin değer İSPARK verisinin gerçek
-  güncelleme sıklığı araştırıldıktan sonra belirlenir. Eşitlik kuralı:
+  Freshness threshold configuration üzerinden yönetilir. Başlangıç değeri (ADR 0010): İSPARK
+  için yaş > 15 dk → stale (polling 5 dk; ölçülen kaynak döngüsü ~5 dk). Değer gerçek gözlemle
+  yalnızca configuration'dan ayarlanır. İSPARK `measuredAt` vermediği için yaş `retrievedAt`'ten
+  hesaplanır ve kullanıcıya gösterilen zaman "alınma zamanı"dır. Eşitlik kuralı:
   `age <= threshold → available`, `age > threshold → stale`. Yaş, `measuredAt` varsa ondan,
   yoksa `retrievedAt`'ten hesaplanır — ancak `retrievedAt` hiçbir zaman `measuredAt` olarak
   adlandırılmaz/gösterilmez.

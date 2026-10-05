@@ -76,7 +76,7 @@ edilebilen hiçbir kural yalnızca dokümana veya hafızaya bırakılmaz.
 | FD-3 | Provider DTO'ları `CityRadar.Infrastructure.Providers.<Provider>.Dtos` altında yaşar ve `internal`'dır. Api, Parking ve Traffic hiçbir `CityRadar.Infrastructure.Providers.*` tipine bağımlı olmaz; dönüşüm adapter sınırında yapılır. Api, Infrastructure'ı yalnızca `Providers.*` dışındaki composition yüzeyi üzerinden kullanır. (`Providers.*` altındaki DTO dışı tiplerin internal olması zorunlu değildir; seçilirse ayrıca kararlaştırılır.) | `ModuleDependencyTests` (IL) |
 | FD-4 | Api contract'ları (`CityRadar.Api.Contracts.*`) Shared/Parking/Traffic tiplerine **hiçbir şekilde** (public yüzey, internal üye, method gövdesi) bağımlı olmaz; domain → contract mapping `Contracts` namespace'i dışında yapılır. *Spec 0001 ile bilinçli olarak sıkılaştırıldı (insan kararı, review F-2, 2026-10-02).* | `ModuleDependencyTests` (IL) |
 | FD-5 | Mobilde HTTP (`fetch`, `axios` veya seçilecek client) yalnızca `mobile/src/api/` içinde kullanılır. | ESLint (`no-restricted-globals`, `no-restricted-properties`, `no-restricted-imports`; `mobile/eslint.config.js`) + `mobile/tooling/tests/eslint-rules.test.mjs` |
-| FD-6 | Mobil kaynakta provider endpoint/host bilgisi (`ibb.gov.tr`, İSPARK host'ları) bulunmaz. Kontrol URL/host'a odaklanır; UI'da "İSPARK" metni serbesttir. Host listesi (`mobile/tooling/provider-hosts.js`) OD-1'e kadar eksiksiz değildir. | ESLint (`no-restricted-syntax`) + `mobile/tooling/forbidden.mjs` (`mobile-forbidden` check adımı, defense-in-depth) + testler |
+| FD-6 | Mobil kaynakta provider endpoint/host bilgisi (`ibb.gov.tr`, İSPARK host'ları) bulunmaz. Kontrol URL/host'a odaklanır; UI'da "İSPARK" metni serbesttir. Host listesi `mobile/tooling/provider-hosts.js`'tedir. ADR 0010'a göre bilinen bütün sağlayıcı host'ları mevcut kök kurallarının (`ibb.gov.tr`, `ibb.istanbul`, `ispark.istanbul`) alt alan adlarıdır. `api.ibb.gov.tr` ve `tkmservices.ibb.gov.tr` için açık test vakaları ilk provider spec'inde/change request'inde eklenir. | ESLint (`no-restricted-syntax`) + `mobile/tooling/forbidden.mjs` (`mobile-forbidden` check adımı, defense-in-depth) + testler |
 | FD-7 | `react-native-maps`, `@rnmapbox/maps` ve Google/Mapbox native map SDK bağımlılıkları eklenmez (MapLibre serbest). Değişiklik yalnızca ADR ile. | `mobile/tooling/forbidden.mjs` deny-list — `package.json` + lockfile ağacı (`mobile-forbidden` check adımı) + testler |
 | FD-8 | Mobil API contract tipleri yalnızca `mobile/src/api/` sınırından kullanılır. | ESLint (`no-restricted-imports`: `src/api` dışından `api/` iç yolları yasak, public yüzey `src/api/index.ts`; `no-restricted-syntax`: dinamik `import()`) + testler |
 
@@ -113,11 +113,14 @@ historical analytics, web client, background location, E2E test altyapısı.
 
 ## Açık kararlar
 
-- **OD-1 — Sağlayıcı verisi.** İSPARK ve İBB trafik verisinin endpoint, response schema,
-  güncelleme sıklığı, kullanım/lisans koşulları ve hata davranışları varsayılmaz; ayrı araştırma +
-  ADR ile doğrulanır. Backend temel kurulumuyla paralel yürüyebilir, fakat **ilk provider
-  implementation başlamadan önce ADR tamamlanmış olmalıdır.** Freshness threshold'ları ve trafik
-  normalizasyon kuralları araştırma yapılmadan tahmin edilmez.
+- ~~OD-1 — Sağlayıcı verisi.~~ **Kapandı (2026-10-05, ADR 0010):**
+  - İSPARK: yalnızca `GET https://api.ibb.gov.tr/ispark/Park` (`measuredAt = null`).
+  - Konumsal trafik: İBB Trafik Yoğunluk Haritası'nın segment servisi
+    (`tkmservices.ibb.gov.tr/web`: `v4/SegmentData`, `v3/Segments/{n}`,
+    `v1/StaticLayerVersion`). Bu servis belgesizdir; yeniden kullanımı için İBB'nin yazılı
+    teyidi production/store yayınını bloklar, geliştirmeyi bloklamaz.
+  - Normalizasyon kuralı ve başlangıç polling/freshness değerleri ADR 0010'dadır; değerler
+    configuration'dır.
 - **OD-2 — Tile/style sağlayıcısı.** Mobil harita feature'ı başlamadan önce ADR; OSM public tile
   sunucusuna production bağımlılığı kurulmaz. En az şu kriterler:
   lisans, attribution zorunlulukları, ücretsiz kullanım limiti, production maliyeti, Android ve
@@ -134,6 +137,7 @@ historical analytics, web client, background location, E2E test altyapısı.
 - **Dependabot:** NuGet + GitHub Actions (spec 0001) ve npm `/mobile` (spec 0003) eklendi.
 - **README:** City Radar README'si yazıldı (spec 0001); mobil bölümleri dolduruldu (spec 0003).
 - **Release requirement (v1'i bloklamaz, store yayınını bloklar):** gizlilik politikası, KVKK
-  bilgilendirmeleri, app store privacy declarations (`docs/security.md`).
+  bilgilendirmeleri, app store privacy declarations, İBB trafik segment servisinin yeniden
+  kullanımı için yazılı teyit ve uygulama içi veri kaynağı atfı (`docs/security.md`, ADR 0010).
 - **Remote / branch protection:** remote kuruldu; repo public, `main` branch protection açık ve
   GitHub tarafından zorlanıyor (`docs/git.md`, ADR 0008).
