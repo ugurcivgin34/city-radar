@@ -68,10 +68,11 @@ resmî kaynakta yayımlanmamış.
 ## Decision
 1. **İSPARK v1:** yalnızca `GET https://api.ibb.gov.tr/ispark/Park` kullanılır. `measuredAt = null`;
    freshness `retrievedAt` üzerinden değerlendirilir (BR-2). `ParkDetay` taraması kapsam dışıdır.
-2. **Konumsal trafik:** İBB Trafik Yoğunluk Haritası'nın arka uç servisi kullanılır:
+2. **Konumsal trafik (T2):** İBB Trafik Yoğunluk Haritası'nın arka uç servisi kullanılır:
    `https://tkmservices.ibb.gov.tr/web` altında `v4/SegmentData`, `v3/Segments/{n}` ve
    `v1/StaticLayerVersion`. Geliştirme bu kaynakla ilerler. **Production/store yayını, İBB'den bu
-   servisin yeniden kullanımı için alınacak yazılı teyide bağlı bir release requirement'tır.**
+   servisin yeniden kullanımı için alınacak yazılı teyide bağlı bir release requirement'tır;**
+   teyit geliştirmeyi bloklamaz.
 3. **Normalizasyon:** domain'in 4 seviyeli modeli korunur. `C1`+`C2` → akıcı, `C3` → orta,
    `C4` → yoğun, `C5` → çok yoğun; `C0`, bilinmeyen kod veya veride olmayan segment → bilinmiyor.
 4. **Başlangıç configuration'ı:** İSPARK polling 5 dk, `stale` eşiği `retrievedAt` yaşı > 15 dk.
@@ -84,7 +85,8 @@ resmî kaynakta yayımlanmamış.
    kullanılmaz; gerekirse yalnızca adapter içinde segment metadata'sı olarak değerlendirilir.
 6. **FD-6 host deny-list'i:** mevcut kök kural (`ibb.gov.tr`, `ibb.istanbul`, `ispark.istanbul`
    ve alt alan adları) korunur. Araştırmada bulunan bütün sağlayıcı host'ları `ibb.gov.tr`
-   altındadır. `api.ibb.gov.tr` ve `tkmservices.ibb.gov.tr` için açık test vakaları eklenir.
+   altındadır. `api.ibb.gov.tr` ve `tkmservices.ibb.gov.tr` için açık test vakaları ilk provider
+   spec'inde/change request'inde eklenir. Bu ADR kod veya test değiştirmez.
 
 ## Consequences
 **Kazanımlar**
@@ -102,26 +104,31 @@ resmî kaynakta yayımlanmamış.
   konumsal trafik katmanı yayınlanamaz; yatırımın trafik adapter'ı kısmı boşa gider. Domain ve
   API contract'ı etkilenmez, ama ürün vaadinin bir ayağı eksik kalır.
 - **Stabilite riski (T2):** belgesiz, sürümlü iç endpoint'ler duyurusuz değişebilir veya auth
-  arkasına alınabilir (v1 alındı). Bu durumda BR-5 devreye girer: son snapshot bayat gösterilir,
-  sonra `503`. Kaynak değişikliği adapter'la sınırlıdır.
+  arkasına alınabilir (v1 alındı). Bu durumda BR-5 devreye girer: son başarılı snapshot varsa
+  bayat olarak sunulur; yalnızca hiç snapshot yoksa (ör. restart sonrası boş in-memory store)
+  `503` döner. Kaynak değişikliği adapter'la sınırlıdır.
 - **İSPARK doğruluk sınırı:** `measuredAt` null olduğundan park başına bayatlık görünmez. Kaynakta
   saatlerce güncellenmemiş bir park, bizim taze `retrievedAt`'imizle "available" görünür. Kabul
   edilen bir v1 kısıtıdır; kullanıcıya gösterilen zaman "alınma zamanı" olarak etiketlenir,
   asla ölçüm zamanı olarak değil.
-- **Untrusted input yükü:** adapter'lar şunları reddetmek zorundadır:
-  - `parkID <= 0` olan veya ad/koordinatı boş kayıtlar (sahte nesne riski);
-  - parse edilemeyen veya İstanbul kapsamı dışındaki koordinatlar;
-  - `0 <= emptyCapacity <= capacity` koşulunu sağlamayan kayıtlar;
-  - `200` ile gelen HTML/SOAP gövdeleri.
-
-  Saat dilimi içermeyen zaman alanları Europe/Istanbul olarak yorumlanır.
+- **Untrusted input yükü:** ilk provider spec'i, adapter doğrulamalarını bu araştırmanın
+  bulgularına dayanarak tanımlar. Bu ADR doğrulama kurallarını kilitlemez; spec'in ele alması
+  gereken gözlemler şunlardır:
+  - olmayan `ParkDetay` id'sine `200` ile dönen sahte nesne (`parkID:0`, boş ad/koordinat);
+  - string ve düzensiz hassasiyette koordinatlar;
+  - kapasite ve boş kapasite tutarlılığı;
+  - gateway'in hata durumlarında `200` ile döndüğü HTML/SOAP gövdeleri.
 - **Normalizasyonda isim çakışması:** İBB'nin "Akıcı" (C3, turuncu) sınıfı bizde "orta" olur.
   İBB haritasıyla karşılaştıran kullanıcı farklı kelime görür.
 - **Yük ve boyut:** trafik geometrisi büyüktür (kademe 1 ~3 MB). Yalnızca `StaticLayerVersion.SEG`
   değiştiğinde yeniden çekilir. SegmentData 60 sn'de bir ~0,5 MB'tır (gzip istenir).
-- **Yeni release requirement:** İBB'den yazılı yeniden kullanım teyidi. Mevcut lisans gereği
-  uygulama içinde atıf (kaynak + lisans linki) gösterilir; İBB logosu veya resmî onay ima eden
-  ifade kullanılmaz.
+- **Yeni release requirement'lar:**
+  - İBB'den yazılı yeniden kullanım teyidi (production/store yayınını bloklar; geliştirmeyi
+    bloklamaz).
+  - Lisans gereği uygulama içinde veri kaynağı atfı ve lisans linki gösterilir; resmî durum
+    veya onay ima edilmez.
+  - City Radar politikası olarak, resmî ilişki veya onay izlenimi vermemek için İBB/İSPARK
+    logosu kullanılmaz.
 - Eşikler tek bir akşam ölçümüne dayanır; başlangıç değerleri yanlış çıkabilir (bkz. revisit).
 
 ## Alternatives considered
@@ -148,8 +155,8 @@ resmî kaynakta yayımlanmamış.
   host tercih edildi.
 
 ## Revisit triggers
-- İBB yeniden kullanımı reddeder ya da teyit store yayınına kadar gelmez → T1'e daralma veya
-  T4 için yeni ADR.
+- İBB yeniden kullanımı reddeder ya da teyit production/store yayınına kadar gelmez → T1'e
+  daralma veya T4 için yeni ADR.
 - T2 endpoint'leri 404/302/401 dönmeye başlar, sürüm değişir (ör. v5) ya da şema değişir.
 - İBB, belgeli ve herkese açık bir konumsal trafik API'si yayınlar → T2 yerine o kullanılır.
 - İSPARK resmî rate limit veya yeni bir endpoint yayınlar, ya da liste cevabı değişir.

@@ -137,7 +137,9 @@ historical analytics, web client, background location, E2E test altyapısı.
 - **Dependabot:** NuGet + GitHub Actions (spec 0001) ve npm `/mobile` (spec 0003) eklendi.
 - **README:** City Radar README'si yazıldı (spec 0001); mobil bölümleri dolduruldu (spec 0003).
 - **Release requirement (v1'i bloklamaz, store yayınını bloklar):** gizlilik politikası, KVKK
-  bilgilendirmeleri, app store privacy declarations, İBB trafik segment servisinin yeniden
-  kullanımı için yazılı teyit ve uygulama içi veri kaynağı atfı (`docs/security.md`, ADR 0010).
+  bilgilendirmeleri, app store privacy declarations ve uygulama içi veri kaynağı atfı
+  (`docs/security.md`, ADR 0010).
+- **Release requirement (geliştirmeyi bloklamaz, production/store yayınını bloklar):** İBB trafik
+  segment servisinin yeniden kullanımı için İBB'den yazılı teyit (`docs/security.md`, ADR 0010).
 - **Remote / branch protection:** remote kuruldu; repo public, `main` branch protection açık ve
   GitHub tarafından zorlanıyor (`docs/git.md`, ADR 0008).
